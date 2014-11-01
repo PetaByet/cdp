@@ -1,28 +1,30 @@
 <?php
 
 if (constant('FILEACCESS')) {
-
-	$backupjobs = json_decode(file_get_contents(getcwd().'/includes/db-backupjobs.json'),true);
-    $backupservers = json_decode(file_get_contents(getcwd().'/includes/db-backupservers.json'),true);
-	if (isset($_REQUEST['backupjob'])) {
-		if ($_REQUEST['backupjob'] == 'add' && isset($_REQUEST['source']) && isset($_REQUEST['directory'])) {
-			$id = md5(rand().time().$_REQUEST['source']);
-			$backupjobs[count($backupjobs)] = array('id' => $id, 'source' => $_REQUEST['source'], 'directory' => $_REQUEST['directory']);
-			file_put_contents(getcwd().'/includes/db-backupjobs.json', json_encode($backupjobs));
-            header('Location: index.php?action=backupjobs&created=true&id='.$id);
-		}
-		elseif ($_REQUEST['backupjob'] == 'remove' && isset($_REQUEST['id'])) {
-			foreach ($backupjobs as $key => $backupjob) {
-				if ($backupjob['id'] == $_REQUEST['id']) {
-					unset($backupjobs[$key]);
-				}
-			}
-            file_put_contents(getcwd().'/includes/db-backupjobs.json', json_encode($backupjobs));
-			header('Location: index.php?action=backupjobs');
-		}
-	}
-	else {
-        	include('header.php');
+    
+    $backupjobs    = json_decode(file_get_contents(getcwd() . '/includes/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents(getcwd() . '/includes/db-backupservers.json'), true);
+    if (isset($_REQUEST['backupjob'])) {
+        if ($_REQUEST['backupjob'] == 'add' && isset($_REQUEST['source']) && isset($_REQUEST['directory'])) {
+            $id                             = md5(rand() . time() . $_REQUEST['source']);
+            $backupjobs[count($backupjobs)] = array(
+                'id' => $id,
+                'source' => $_REQUEST['source'],
+                'directory' => $_REQUEST['directory']
+            );
+            file_put_contents(getcwd() . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            header('Location: index.php?action=backupjobs&created=true&id=' . $id);
+        } elseif ($_REQUEST['backupjob'] == 'remove' && isset($_REQUEST['id'])) {
+            foreach ($backupjobs as $key => $backupjob) {
+                if ($backupjob['id'] == $_REQUEST['id']) {
+                    unset($backupjobs[$key]);
+                }
+            }
+            file_put_contents(getcwd() . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            header('Location: index.php?action=backupjobs');
+        }
+    } else {
+        include('header.php');
 ?>
 <div class="container">
 	<h2 class="text-center">Backup Jobs</h2>
@@ -30,24 +32,24 @@ if (constant('FILEACCESS')) {
         if (isset($_GET['id']) && isset($_GET['created']) && $_GET['created']) {
             echo '<div class="alert alert-info">';
             echo 'Congratulations! Your backup job has been created. You may now add it to crontab to run it automatically. Here are some examples:<br>';
-            echo 'A backup every 15 minutes: <code>*/15 * * * * /usr/bin/php /var/www/html/cron.php '.$_GET['id'].' >/dev/null 2>&1</code><br>';
-            echo 'Hourly backups: <code>0 * * * * /usr/bin/php /var/www/html/cron.php '.$_GET['id'].' >/dev/null 2>&1</code><br>';
-            echo 'Daily backups at 3am: <code>* 3 * * * /usr/bin/php /var/www/html/cron.php '.$_GET['id'].' >/dev/null 2>&1</code><br>';
+            echo 'A backup every 15 minutes: <code>*/15 * * * * /usr/bin/php /var/www/html/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
+            echo 'Hourly backups: <code>0 * * * * /usr/bin/php /var/www/html/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
+            echo 'Daily backups at 3am: <code>* 3 * * * /usr/bin/php /var/www/html/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
             echo 'For more information about how crontab works, please use <a href="http://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/">this guide</a>.<br>';
             echo '</div>';
         }
-        ?>
+?>
 	<table class="table table-striped table-bordered">
 		<tr><th>Source</th><th>Directory</th><th>ID</th><th>Actions</th></tr>
 <?php
-if (is_array($backupjobs)) {
-	foreach ($backupjobs as $backupjob) {
-		echo '<tr><td>'.$backupjob['source'].'</td>';
-		echo '<td>'.$backupjob['directory'].'</td>';
-        echo '<td>'.$backupjob['id'].'</td>';
-		echo '<td><a href="index.php?action=viewbackups&id='.$backupjob['id'].'" class="btn btn-info">View Backups</a> <a href="index.php?action=backupjobs&backupjob=remove&id='.$backupjob['id'].'" class="btn btn-danger">Delete</a></td></tr>';
-    }
-}
+        if (is_array($backupjobs)) {
+            foreach ($backupjobs as $backupjob) {
+                echo '<tr><td>' . $backupjob['source'] . '</td>';
+                echo '<td>' . $backupjob['directory'] . '</td>';
+                echo '<td>' . $backupjob['id'] . '</td>';
+                echo '<td><a href="index.php?action=viewbackups&id=' . $backupjob['id'] . '" class="btn btn-info">View Backups</a> <a href="index.php?action=backupjobs&backupjob=remove&id=' . $backupjob['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
+            }
+        }
 ?>
 	</table>
     <form class="form-horizontal" role="form" method="post" action="index.php">
@@ -56,18 +58,17 @@ if (is_array($backupjobs)) {
         <div class="form-group">
             <label for="inputUsername3" class="col-sm-2 control-label">Source</label>
             <div class="col-sm-10">
-                    <?php
+<?php
         if (count($backupservers) == 0) {
             echo '<div class="alert alert-warning">Please add a server first.</div>';
-        }
-        else {
+        } else {
             echo '<select name="source">';
-            foreach($backupservers as $backupserver) {
-                echo '<option value="'.$backupserver['host'].'">'.$backupserver['host'].'</option>';
+            foreach ($backupservers as $backupserver) {
+                echo '<option value="' . $backupserver['host'] . '">' . $backupserver['host'] . '</option>';
             }
             echo '</select>';
         }
-        ?>
+?>
             </div>
         </div>
         <div class="form-group">
@@ -84,8 +85,8 @@ if (is_array($backupjobs)) {
     </form>
 </div>
 <?php
-	        include('footer.php');
-	}
+        include('footer.php');
+    }
 }
 
 ?>

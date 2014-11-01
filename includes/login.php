@@ -1,25 +1,23 @@
 <?php
 
 if (constant('FILEACCESS')) {
-	if (isset($_POST['username']) && isset($_POST['password'])) {
-		if ($_POST['username'] == $config['adminusername'] && md5($_POST['password']) == $config['adminpassword']) {
-			$_SESSION['user'] = $_POST['username'];
-			header('Location: index.php');
-			die();
-		}
-		else {
-			header('Location: index.php?login=failed');
-		}
-	}
-	else {
-	        include('header.php');
+    if (isset($_POST['username']) && isset($_POST['password'])) {
+        if ($_POST['username'] == $config['adminusername'] && md5($_POST['password']) == $config['adminpassword']) {
+            $_SESSION['user'] = $_POST['username'];
+            header('Location: index.php');
+            die();
+        } else {
+            header('Location: index.php?login=failed');
+        }
+    } else {
+        include('header.php');
 ?>
 <div class="container">
     <div class="col-md-6 col-md-offset-3 well">
 <?php
-	if (isset($_GET['login']) && $_GET['login'] == 'failed') {
-		echo '<div class="alert alert-info">Login failed.</div>';
-	}
+        if (isset($_GET['login']) && $_GET['login'] == 'failed') {
+            echo '<div class="alert alert-info">Login failed.</div>';
+        }
 ?>
 	<h2 class="text-center">Please log in</h2>
         <form class="form-horizontal" role="form" method="post" action="index.php">
@@ -44,8 +42,8 @@ if (constant('FILEACCESS')) {
     </div>
 </div>
 <?php
-        	include('footer.php');
-	}
+        include('footer.php');
+    }
 }
 
 ?>

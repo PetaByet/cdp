@@ -1,42 +1,47 @@
 <?php
 
 if (constant('FILEACCESS')) {
-
-	$backupservers = json_decode(file_get_contents(getcwd().'/includes/db-backupservers.json'),true);
-	if (isset($_REQUEST['backupserver'])) {
-		if ($_REQUEST['backupserver'] == 'add' && isset($_REQUEST['host']) && isset($_REQUEST['port']) && isset($_REQUEST['authtype']) && isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
-			$id = md5(rand().time().$_REQUEST['host']);
-			$backupservers[count($backupservers)] = array('id' => $id, 'host' => $_REQUEST['host'], 'port' => $_REQUEST['port'], 'authtype' => $_REQUEST['authtype'], 'username' => $_REQUEST['username'], 'password' => $_REQUEST['password']);
-			file_put_contents(getcwd().'/includes/db-backupservers.json', json_encode($backupservers));
+    
+    $backupservers = json_decode(file_get_contents(getcwd() . '/includes/db-backupservers.json'), true);
+    if (isset($_REQUEST['backupserver'])) {
+        if ($_REQUEST['backupserver'] == 'add' && isset($_REQUEST['host']) && isset($_REQUEST['port']) && isset($_REQUEST['authtype']) && isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
+            $id                                   = md5(rand() . time() . $_REQUEST['host']);
+            $backupservers[count($backupservers)] = array(
+                'id' => $id,
+                'host' => $_REQUEST['host'],
+                'port' => $_REQUEST['port'],
+                'authtype' => $_REQUEST['authtype'],
+                'username' => $_REQUEST['username'],
+                'password' => $_REQUEST['password']
+            );
+            file_put_contents(getcwd() . '/includes/db-backupservers.json', json_encode($backupservers));
             header('Location: index.php?action=backupservers');
-		}
-		elseif ($_REQUEST['backupserver'] == 'remove' && isset($_REQUEST['id'])) {
-			foreach ($backupservers as $key => $backupserver) {
-				if ($backupserver['id'] == $_REQUEST['id']) {
-					unset($backupservers[$key]);
-				}
-			}
-            file_put_contents(getcwd().'/includes/db-backupservers.json', json_encode($backupservers));
-			header('Location: index.php?action=backupservers');
-		}
-	}
-	else {
-        	include('header.php');
+        } elseif ($_REQUEST['backupserver'] == 'remove' && isset($_REQUEST['id'])) {
+            foreach ($backupservers as $key => $backupserver) {
+                if ($backupserver['id'] == $_REQUEST['id']) {
+                    unset($backupservers[$key]);
+                }
+            }
+            file_put_contents(getcwd() . '/includes/db-backupservers.json', json_encode($backupservers));
+            header('Location: index.php?action=backupservers');
+        }
+    } else {
+        include('header.php');
 ?>
 <div class="container">
 	<h2 class="text-center">Servers</h2>
 	<table class="table table-striped table-bordered">
 		<tr><th>Host</th><th>Port</th><th>SSH Authentication</th><th>Username</th><th>Action</th></tr>
 <?php
-if (is_array($backupservers)) {
-	foreach ($backupservers as $backupserver) {
-		echo '<tr><td>'.$backupserver['host'].'</td>';
-		echo '<td>'.$backupserver['port'].'</td>';
-		echo '<td>'.$backupserver['authtype'].'</td>';
-                echo '<td>'.$backupserver['username'].'</td>';
-		echo '<td><a href="index.php?action=backupservers&backupserver=remove&id='.$backupserver['id'].'" class="btn btn-danger">Delete</a></td></tr>';
-    }
-}
+        if (is_array($backupservers)) {
+            foreach ($backupservers as $backupserver) {
+                echo '<tr><td>' . $backupserver['host'] . '</td>';
+                echo '<td>' . $backupserver['port'] . '</td>';
+                echo '<td>' . $backupserver['authtype'] . '</td>';
+                echo '<td>' . $backupserver['username'] . '</td>';
+                echo '<td><a href="index.php?action=backupservers&backupserver=remove&id=' . $backupserver['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
+            }
+        }
 ?>
 	</table>
     <form class="form-horizontal" role="form" method="post" action="index.php">
@@ -81,8 +86,8 @@ if (is_array($backupservers)) {
     </form>
 </div>
 <?php
-	        include('footer.php');
-	}
+        include('footer.php');
+    }
 }
 
 ?>
