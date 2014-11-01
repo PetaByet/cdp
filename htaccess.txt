@@ -1,0 +1,16 @@
+Options -Indexes
+
+<Files .htaccess>
+ order allow,deny
+ deny from all
+</Files>
+
+<Files *.json>
+ order allow,deny
+ deny from all
+</Files>
+
+<Files *.tar.gz>
+ order allow,deny
+ deny from all
+</Files>
