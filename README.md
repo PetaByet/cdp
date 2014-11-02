@@ -26,10 +26,16 @@ The backup server **has** to be running CentOS, but the server(s) to be backed u
 `wget cdp.me/install.sh && chmod +x install.sh && ./install.sh`
 
 ---------------------------------------
-#### System Requirements
+#### System/Software Requirements
 * Backup Server (the server to store all backups)
   * Minimal / Fresh OS Installation
   * CentOS 6.x
 * Source Server (the server to be backed up)
-  * SSH/SFTP
+  * SSH + SFTP
   * tar
+  * *99% of servers meet this requirement*
+  
+---------------------------------------
+For more information about CDP.me, please visit our wiki at https://github.com/PetaByet/cdp/wiki
+Please report any bugs that you have found here https://github.com/PetaByet/cdp/issues
+  
