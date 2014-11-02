@@ -12,9 +12,9 @@ $starttime = time();
 
 $log = 'Backup job (' . $argv[1] . ') started' . PHP_EOL;
 
-$backups       = json_decode(file_get_contents('/var/www/html/includes/db-backups.json'), true);
-$backupjobs    = json_decode(file_get_contents('/var/www/html/includes/db-backupjobs.json'), true);
-$backupservers = json_decode(file_get_contents('/var/www/html/includes/db-backupservers.json'), true);
+$backups       = json_decode(file_get_contents($config['path'].'/includes/db-backups.json'), true);
+$backupjobs    = json_decode(file_get_contents($config['path'].'/includes/db-backupjobs.json'), true);
+$backupservers = json_decode(file_get_contents($config['path'].'/includes/db-backupservers.json'), true);
 
 function exitcron()
 {
@@ -56,7 +56,7 @@ if (!$backupserver) {
     exitcron();
 }
 
-set_include_path('/var/www/html/phpseclib');
+set_include_path($config['path'].'/phpseclib');
 
 include('Net/SSH2.php');
 include('Net/SFTP.php');
@@ -101,7 +101,7 @@ if (!$sftpfiletransfer) {
     $log .= $sftpfiletransfer;
 }
 $log .= $ssh->exec('rm -rf /tmp/' . $dirname) . PHP_EOL;
-$log .= rename($dirname . '.tar.gz', '/var/www/html/files/' . $dirname . '.tar.gz') . PHP_EOL;
+$log .= rename($dirname . '.tar.gz', $config['path'].'/files/' . $dirname . '.tar.gz') . PHP_EOL;
 
 $timetaken = time() - $starttime;
 
@@ -110,11 +110,11 @@ $log .= 'Backup completed in ' . $timetaken . ' seconds.' . PHP_EOL;
 $backups[count($backups)] = array(
     'id' => $backupjob['id'],
     'file' => $dirname . '.tar.gz',
-    'size' => filesize('/var/www/html/files/' . $dirname . '.tar.gz'),
+    'size' => filesize($config['path'].'/files/' . $dirname . '.tar.gz'),
     'time' => $starttime
 );
 
-file_put_contents('/var/www/html/includes/db-backups.json', json_encode($backups));
+file_put_contents($config['path'].'/includes/db-backups.json', json_encode($backups));
 
 exitcron();
 

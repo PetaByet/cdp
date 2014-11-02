@@ -2,8 +2,8 @@
 
 if (constant('FILEACCESS')) {
     
-    $backupjobs    = json_decode(file_get_contents(getcwd() . '/includes/db-backupjobs.json'), true);
-    $backupservers = json_decode(file_get_contents(getcwd() . '/includes/db-backupservers.json'), true);
+    $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
     if (isset($_REQUEST['backupjob'])) {
         if ($_REQUEST['backupjob'] == 'add' && isset($_REQUEST['source']) && isset($_REQUEST['directory'])) {
             $id                             = md5(rand() . time() . $_REQUEST['source']);
@@ -12,7 +12,7 @@ if (constant('FILEACCESS')) {
                 'source' => $_REQUEST['source'],
                 'directory' => $_REQUEST['directory']
             );
-            file_put_contents(getcwd() . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            file_put_contents($config['path'] . '/includes/db-backupjobs.json', json_encode($backupjobs));
             header('Location: index.php?action=backupjobs&created=true&id=' . $id);
         } elseif ($_REQUEST['backupjob'] == 'remove' && isset($_REQUEST['id'])) {
             foreach ($backupjobs as $key => $backupjob) {
@@ -20,11 +20,11 @@ if (constant('FILEACCESS')) {
                     unset($backupjobs[$key]);
                 }
             }
-            file_put_contents(getcwd() . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            file_put_contents($config['path'] . '/includes/db-backupjobs.json', json_encode($backupjobs));
             header('Location: index.php?action=backupjobs');
         }
     } else {
-        include('header.php');
+        include($config['path'].'/includes/header.php');
 ?>
 <div class="container">
 	<h2 class="text-center">Backup Jobs</h2>
@@ -32,9 +32,9 @@ if (constant('FILEACCESS')) {
         if (isset($_GET['id']) && isset($_GET['created']) && $_GET['created']) {
             echo '<div class="alert alert-info">';
             echo 'Congratulations! Your backup job has been created. You may now add it to crontab to run it automatically. Here are some examples:<br>';
-            echo 'A backup every 15 minutes: <code>*/15 * * * * /usr/bin/php /var/www/html/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
-            echo 'Hourly backups: <code>0 * * * * /usr/bin/php /var/www/html/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
-            echo 'Daily backups at 3am: <code>* 3 * * * /usr/bin/php /var/www/html/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
+            echo 'A backup every 15 minutes: <code>*/15 * * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
+            echo 'Hourly backups: <code>0 * * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
+            echo 'Daily backups at 3am: <code>* 3 * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
             echo 'For more information about how crontab works, please use <a href="http://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/">this guide</a>.<br>';
             echo '</div>';
         }
@@ -85,7 +85,7 @@ if (constant('FILEACCESS')) {
     </form>
 </div>
 <?php
-        include('footer.php');
+        include($config['path'].'/includes/footer.php');
     }
 }
 

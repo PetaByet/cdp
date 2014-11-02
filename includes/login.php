@@ -10,7 +10,7 @@ if (constant('FILEACCESS')) {
             header('Location: index.php?login=failed');
         }
     } else {
-        include('header.php');
+        include($config['path'].'/includes/header.php');
 ?>
 <div class="container">
     <div class="col-md-6 col-md-offset-3 well">
@@ -42,7 +42,7 @@ if (constant('FILEACCESS')) {
     </div>
 </div>
 <?php
-        include('footer.php');
+        include($config['path'].'/includes/footer.php');
     }
 }
 

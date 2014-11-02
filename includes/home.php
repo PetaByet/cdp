@@ -2,10 +2,10 @@
 
 if (constant('FILEACCESS')) {
 
-	include('header.php');
-    $backups       = json_decode(file_get_contents('/var/www/html/includes/db-backups.json'), true);
-    $backupjobs    = json_decode(file_get_contents('/var/www/html/includes/db-backupjobs.json'), true);
-    $backupservers = json_decode(file_get_contents('/var/www/html/includes/db-backupservers.json'), true);
+	include($config['path'].'/includes/header.php');
+    $backups       = json_decode(file_get_contents($config['path'].'/includes/db-backups.json'), true);
+    $backupjobs    = json_decode(file_get_contents($config['path'].'/includes/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'].'/includes/db-backupservers.json'), true);
 ?>
 
 
@@ -26,7 +26,7 @@ if (constant('FILEACCESS')) {
 </div>
 
 <?php
-	include('footer.php');
+	include($config['path'].'/includes/footer.php');
 }
 
 ?>

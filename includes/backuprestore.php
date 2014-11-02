@@ -2,12 +2,13 @@
 
 if (constant('FILEACCESS')) {
     echo '<pre>';
+    //making sure backup restore job is not terminated
     ignore_user_abort(true);
     set_time_limit(0);
     echo 'Initiating backup restore...' . PHP_EOL;
-    $backups       = json_decode(file_get_contents('/var/www/html/includes/db-backups.json'), true);
-    $backupjobs    = json_decode(file_get_contents('/var/www/html/includes/db-backupjobs.json'), true);
-    $backupservers = json_decode(file_get_contents('/var/www/html/includes/db-backupservers.json'), true);
+    $backups       = json_decode(file_get_contents($config['path'].'/includes/db-backups.json'), true);
+    $backupjobs    = json_decode(file_get_contents($config['path'].'/includes/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'].'/includes/db-backupservers.json'), true);
     
     function GetBackupDetails($backupdata)
     {
@@ -42,7 +43,7 @@ if (constant('FILEACCESS')) {
     $backup       = GetBackupDetails($_GET['id']);
     $backupjob    = GetJobDetails($backup['id']);
     $backupserver = GetServerDetails($backupjob['source']);
-    set_include_path('/var/www/html/phpseclib');
+    set_include_path($config['path'].'/phpseclib');
     include('Net/SSH2.php');
     include('Net/SFTP.php');
     include('Crypt/RSA.php');
@@ -68,7 +69,7 @@ if (constant('FILEACCESS')) {
         die('SSH login failed');
     }
     echo $sftp->chdir('/');
-    echo $sftp->put($_GET['id'], '/var/www/html/files/' . $_GET['id'], NET_SFTP_LOCAL_FILE);
+    echo $sftp->put($_GET['id'], $config['path'].'/files/' . $_GET['id'], NET_SFTP_LOCAL_FILE);
     echo $ssh->exec('tar -zxvf /' . $_GET['id'] . ' -C /');
     echo $ssh->exec('rm -f /' . $_GET['id']);
     echo 'Backup restored';

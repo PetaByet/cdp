@@ -2,7 +2,7 @@
 
 if (constant('FILEACCESS')) {
     
-    $backupservers = json_decode(file_get_contents(getcwd() . '/includes/db-backupservers.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
     if (isset($_REQUEST['backupserver'])) {
         if ($_REQUEST['backupserver'] == 'add' && isset($_REQUEST['host']) && isset($_REQUEST['port']) && isset($_REQUEST['authtype']) && isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
             $id                                   = md5(rand() . time() . $_REQUEST['host']);
@@ -14,7 +14,7 @@ if (constant('FILEACCESS')) {
                 'username' => $_REQUEST['username'],
                 'password' => $_REQUEST['password']
             );
-            file_put_contents(getcwd() . '/includes/db-backupservers.json', json_encode($backupservers));
+            file_put_contents($config['path'] . '/includes/db-backupservers.json', json_encode($backupservers));
             header('Location: index.php?action=backupservers');
         } elseif ($_REQUEST['backupserver'] == 'remove' && isset($_REQUEST['id'])) {
             foreach ($backupservers as $key => $backupserver) {
@@ -22,11 +22,11 @@ if (constant('FILEACCESS')) {
                     unset($backupservers[$key]);
                 }
             }
-            file_put_contents(getcwd() . '/includes/db-backupservers.json', json_encode($backupservers));
+            file_put_contents($config['path'] . '/includes/db-backupservers.json', json_encode($backupservers));
             header('Location: index.php?action=backupservers');
         }
     } else {
-        include('header.php');
+        include($config['path'].'/includes/header.php');
 ?>
 <div class="container">
 	<h2 class="text-center">Servers</h2>
@@ -86,7 +86,7 @@ if (constant('FILEACCESS')) {
     </form>
 </div>
 <?php
-        include('footer.php');
+        include($config['path'].'/includes/footer.php');
     }
 }
 
