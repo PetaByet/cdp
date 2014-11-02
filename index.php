@@ -42,6 +42,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user'] != $config['adminusername']) 
     } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'logout') {
         session_unset();
         session_destroy();
+        header('Location: index.php');
     } else {
         include('includes/home.php');
     }
