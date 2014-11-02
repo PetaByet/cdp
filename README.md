@@ -17,6 +17,7 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 * Json Flat File Database (no MySQL involved)
 * Backups ran using cron
 * Server authentication using password or key
+* Email notifications
 
 ---------------------------------------
 #### Installation
