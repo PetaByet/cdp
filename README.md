@@ -22,14 +22,16 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 ---------------------------------------
 #### Installation
 You may use the following command to install CDP.me on your storage/backup server.
-The backup server **has** to be running CentOS, but the server(s) to be backed up may run any linux distrubution.
+The backup server **has** to be running CentOS/Debian/Ubuntu, but the server(s) to be backed up may run any linux distrubution.
 `wget cdp.me/install.sh && chmod +x install.sh && ./install.sh`
+
+If your backup server is running a distribution other than the ones above or you do not want to use Apache, you may install CDP.me manually using the wiki guide here https://github.com/PetaByet/cdp/wiki/Manual-Installation
 
 ---------------------------------------
 #### System/Software Requirements
 * Backup Server (the server to store all backups)
   * Minimal / Fresh OS Installation
-  * CentOS 6.x
+  * Linux
 * Source Server (the server to be backed up)
   * SSH + SFTP
   * tar
