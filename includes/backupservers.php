@@ -76,6 +76,7 @@ if (constant('FILEACCESS')) {
             <label for="inputPassword3" class="col-sm-2 control-label">Password or Key Path</label>
             <div class="col-sm-10">
                 <input type="text" class="form-control" name="password" id="inputPassword3" placeholder="ssh password or path to ssh key" required>
+                <p>Note: if your SSH key has a passphrase, please enter it after the key path, separated with a space (like /path/to/key password)</p>
             </div>
         </div>
         <div class="form-group">

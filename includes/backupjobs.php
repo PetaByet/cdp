@@ -5,12 +5,13 @@ if (constant('FILEACCESS')) {
     $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
     $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
     if (isset($_REQUEST['backupjob'])) {
-        if ($_REQUEST['backupjob'] == 'add' && isset($_REQUEST['source']) && isset($_REQUEST['directory'])) {
+        if ($_REQUEST['backupjob'] == 'add' && isset($_REQUEST['source']) && isset($_REQUEST['directory']) && isset($_REQUEST['expiry'])) {
             $id                             = md5(rand() . time() . $_REQUEST['source']);
             $backupjobs[count($backupjobs)] = array(
                 'id' => $id,
                 'source' => $_REQUEST['source'],
-                'directory' => $_REQUEST['directory']
+                'directory' => $_REQUEST['directory'],
+                'expiry' => $_REQUEST['expiry']
             );
             file_put_contents($config['path'] . '/includes/db-backupjobs.json', json_encode($backupjobs));
             header('Location: index.php?action=backupjobs&created=true&id=' . $id);
@@ -36,17 +37,19 @@ if (constant('FILEACCESS')) {
             echo 'Hourly backups: <code>0 * * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
             echo 'Daily backups at 3am: <code>* 3 * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
             echo 'For more information about how crontab works, please use <a href="http://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/">this guide</a>.<br>';
+            echo 'And here is the command itself: <input type="text" value="php '.$config['path'].'/cron.php '. $_GET['id'].'">';
             echo '</div>';
         }
 ?>
 	<table class="table table-striped table-bordered">
-		<tr><th>Source</th><th>Directory</th><th>ID</th><th>Actions</th></tr>
+		<tr><th>Source</th><th>Directory</th><th>ID</th><th>Backup Auto-Delete</th><th>Actions</th></tr>
 <?php
         if (is_array($backupjobs)) {
             foreach ($backupjobs as $backupjob) {
                 echo '<tr><td>' . $backupjob['source'] . '</td>';
                 echo '<td>' . $backupjob['directory'] . '</td>';
                 echo '<td>' . $backupjob['id'] . '</td>';
+                echo '<td>' . $backupjob['expiry'] . ' Days</td>';
                 echo '<td><a href="index.php?action=viewbackups&id=' . $backupjob['id'] . '" class="btn btn-info">View Backups</a> <a href="index.php?action=backupjobs&backupjob=remove&id=' . $backupjob['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
             }
         }
@@ -75,6 +78,12 @@ if (constant('FILEACCESS')) {
             <label for="inputUsername3" class="col-sm-2 control-label">Directory</label>
             <div class="col-sm-10">
                 <input type="text" class="form-control" name="directory" id="inputUsername3" placeholder="/var/www/html" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputUsername3" class="col-sm-2 control-label">Backup Auto-Delete (days)</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" name="expiry" min="1" max="999" value="30" required>
             </div>
         </div>
         <div class="form-group">

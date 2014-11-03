@@ -7,9 +7,25 @@ require('config.php');
 define('FILEACCESS', true);
 
 if (!isset($_SESSION['user']) || $_SESSION['user'] != $config['adminusername']) {
+    //login check
     $loggedin = false;
     include($config['path'].'/includes/login.php');
-} else {
+}
+elseif($loggedin && $_SESSION['ip'] != $_SERVER['REMOTE_ADDR']) {
+    //session ip check
+    session_unset();
+    session_destroy();
+    header('Location: index.php');
+}
+elseif($loggedin && $_SESSION['time'] > $config['logintimeout'] + time()) {
+    //inactivity timeout check
+    session_unset();
+    session_destroy();
+    header('Location: index.php');
+}
+else {
+    //restart inactivity timer
+    $_SESSION['time'] = time();
     $loggedin = true;
     if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backupservers') {
         include($config['path'].'/includes/backupservers.php');

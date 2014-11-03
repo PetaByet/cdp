@@ -57,8 +57,12 @@ if (constant('FILEACCESS')) {
             die('SFTP password login failed');
         }
     } elseif ($backupserver['authtype'] == 'key') {
+        $serverkey = explode(' ', $backupserver['password']);
         $key = new Crypt_RSA();
-        $key->loadKey(file_get_contents($backupserver['password']));
+        if (isset($serverkey[1])){
+            $key->setPassword($serverkey[1]);
+        }
+        $key->loadKey(file_get_contents($serverkey[0]]));
         if (!$ssh->login($backupserver['username'], $key)) {
             die('SSH key login failed');
         }

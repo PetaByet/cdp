@@ -3,7 +3,9 @@
 if (constant('FILEACCESS')) {
     if (isset($_POST['username']) && isset($_POST['password'])) {
         if ($_POST['username'] == $config['adminusername'] && md5($_POST['password']) == $config['adminpassword']) {
-            $_SESSION['user'] = $_POST['username'];
+            $_SESSION['user']   = $_POST['username'];
+            $_SESSION['ip']     = $_SERVER['REMOTE_ADDR'];
+            $_SESSION['time']   = time();
             header('Location: index.php');
             die();
         } else {

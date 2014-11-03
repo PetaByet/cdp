@@ -12,5 +12,6 @@ $config['adminemail']       = 'someone@test.com'; //admin email address
 $config['sendnotification'] = true; //send email notification (recommended)
 $config['path']             = '/var/www/html'; //script root path
 $config['version']          = 'Beta1.1'; //script version
+$config['logintimeout']     = '1800'; //inactivity timeout in seconds
 
 ?>

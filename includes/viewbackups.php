@@ -13,9 +13,9 @@ if (constant('FILEACCESS')) {
         );
         return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
     }
-    $backups = json_decode(file_get_contents(getcwd() . '/includes/db-backups.json'), true);
+    $backups = json_decode(file_get_contents($config['path']. '/includes/db-backups.json'), true);
     $backups = array_reverse($backups); //reverse the array to make newest backups at the top
-    include('header.php');
+    include($config['path'].'/includes/header.php');
     echo '<div class="container"><h2>View Backups</h2>';
     echo '<table class="table table-striped table-bordered">';
     echo '<tr><th>File</th><th>Size</th><th>Time</th><th>Actions</th>';
@@ -29,7 +29,7 @@ if (constant('FILEACCESS')) {
     }
     echo '</table>';
     echo '</div>';
-    include('footer.php');
+    include($config['path'].'/includes/footer.php');
 }
 
 ?>

@@ -23,6 +23,9 @@ function exitcron()
     if ($config['sendnotification'] && filter_var($config['adminemail'], FILTER_VALIDATE_EMAIL)) {
         mail($config['adminemail'], 'CDP.me backup report', wordwrap($log, 70));
     }
+    else {
+        echo $log;
+    }
     die();
 }
 function GetJobDetails($jobid)
@@ -73,8 +76,12 @@ if ($backupserver['authtype'] == 'password') {
         exitcron();
     }
 } elseif ($backupserver['authtype'] == 'key') {
+    $serverkey = explode(' ', $backupserver['password']);
     $key = new Crypt_RSA();
-    $key->loadKey(file_get_contents($backupserver['password']));
+    if (isset($serverkey[1])){
+        $key->setPassword($serverkey[1]);
+    }
+    $key->loadKey(file_get_contents($serverkey[0]]));
     if (!$ssh->login($backupserver['username'], $key)) {
         $log .= 'SSH key login failed' . PHP_EOL;
         exitcron();
@@ -115,6 +122,23 @@ $backups[count($backups)] = array(
 );
 
 file_put_contents($config['path'].'/includes/db-backups.json', json_encode($backups));
+
+if (isset($backupjob['expiry'])) {
+    $backups = json_decode(file_get_contents($config['path'].'/includes/db-backups.json'), true);
+    $log .= 'Processing backup auto-delete'. PHP_EOL;
+    $expirecutofftime = time() - 86400 * $backupjob['expiry'];
+    foreach ($backups as $backupkey => $backup) {
+        if ($backup['id'] == $backupjob['id'] && $backup['time'] < $expirecutofftime) {
+            if (file_exists($config['path'] . '/files/' . $backup['file']) && unlink($config['path'] . '/files/' . $backup['file'])) {
+                unset($backups[$backupkey]);
+                $log .= 'Successfully removed '.$backup['file'].PHP_EOL;
+            }
+            else {
+                $log .= 'Error removing '.$backup['file'].PHP_EOL;
+        }
+    }
+    file_put_contents($config['path'].'/includes/db-backups.json', json_encode($backups));
+}
 
 exitcron();
 
