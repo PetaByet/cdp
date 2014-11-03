@@ -14,10 +14,12 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
   * View Backups
   * Download Backups
   * Restore Backups
-* Json Flat File Database (no MySQL involved)
+  * Session security (IP Check + inactivity timeout)
+* Json Flat File Database (no MySQL database involved)
 * Backups ran using cron
-* Server authentication using password or key
+* Server authentication using password or RSA key
 * Email notifications
+* Backup rotation / auto delete
 
 ---------------------------------------
 #### Installation
