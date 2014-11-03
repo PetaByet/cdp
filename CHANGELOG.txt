@@ -13,9 +13,9 @@ Improvements
 
 ---
 Upgrade instructions:
-1. Back up the .json databases
+1. Back up the .json databases and files folder
 2. Run the installer
-3. Restore databases
+3. Restore databases and files
 4. Re-configure the config.php file (DO NOT restore the old config.php)
 4. db-backupjobs.json must be updated with https://cdp.me/tools/beta-1-2-backupjobs.php
 

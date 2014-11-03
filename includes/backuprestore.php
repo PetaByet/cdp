@@ -62,7 +62,7 @@ if (constant('FILEACCESS')) {
         if (isset($serverkey[1])){
             $key->setPassword($serverkey[1]);
         }
-        $key->loadKey(file_get_contents($serverkey[0]]));
+        $key->loadKey(file_get_contents($serverkey[0]));
         if (!$ssh->login($backupserver['username'], $key)) {
             die('SSH key login failed');
         }

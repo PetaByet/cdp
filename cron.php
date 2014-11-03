@@ -81,7 +81,7 @@ if ($backupserver['authtype'] == 'password') {
     if (isset($serverkey[1])){
         $key->setPassword($serverkey[1]);
     }
-    $key->loadKey(file_get_contents($serverkey[0]]));
+    $key->loadKey(file_get_contents($serverkey[0]));
     if (!$ssh->login($backupserver['username'], $key)) {
         $log .= 'SSH key login failed' . PHP_EOL;
         exitcron();
@@ -135,6 +135,7 @@ if (isset($backupjob['expiry'])) {
             }
             else {
                 $log .= 'Error removing '.$backup['file'].PHP_EOL;
+            }
         }
     }
     file_put_contents($config['path'].'/includes/db-backups.json', json_encode($backups));
