@@ -11,7 +11,7 @@ $config['adminpassword']    = '5f4dcc3b5aa765d61d8327deb882cf99'; //md5 encrypte
 $config['adminemail']       = 'someone@test.com'; //admin email address
 $config['sendnotification'] = true; //send email notification (recommended)
 $config['path']             = '/var/www/html'; //script root path
-$config['version']          = 'Beta1.1'; //script version
+$config['version']          = 'Beta 1.2'; //script version
 $config['logintimeout']     = '1800'; //inactivity timeout in seconds
 
 ?>

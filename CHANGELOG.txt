@@ -1,5 +1,5 @@
 ============================
-Beta1.2 | 3 November 2014
+Beta 1.2 | 3 November 2014
 ============================
 Additions
 - Added SSH key passphrase
@@ -20,13 +20,13 @@ Upgrade instructions:
 4. db-backupjobs.json must be updated with https://cdp.me/tools/beta-1-2-backupjobs.php
 
 ============================
-Beta1.1 | 2 November 2014
+Beta 1.1 | 2 November 2014
 ============================
 - Added Debian/Ubuntu support in auto installer
 - Full linux / web server support
 - Code optimizations
 
 ============================
-Beta1.0 | 2 November 2014
+Beta 1.0 | 2 November 2014
 ============================
 - Initial Release
