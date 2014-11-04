@@ -35,7 +35,7 @@ if (constant('FILEACCESS')) {
             echo 'Congratulations! Your backup job has been created. You may now add it to crontab to run it automatically. Here are some examples:<br>';
             echo 'A backup every 15 minutes: <code>*/15 * * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
             echo 'Hourly backups: <code>0 * * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
-            echo 'Daily backups at 3am: <code>* 3 * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
+            echo 'Daily backups at 3am: <code>0 3 * * * php '.$config['path'].'/cron.php ' . $_GET['id'] . ' >/dev/null 2>&1</code><br>';
             echo 'For more information about how crontab works, please use <a href="http://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/">this guide</a>.<br>';
             echo 'And here is the command itself: <input type="text" value="php '.$config['path'].'/cron.php '. $_GET['id'].'">';
             echo '</div>';
