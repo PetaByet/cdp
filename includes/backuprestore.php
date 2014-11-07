@@ -1,6 +1,7 @@
 <?php
 
 if (constant('FILEACCESS')) {
+    checkacl('restoreb');
     echo '<pre>';
     //making sure backup restore job is not terminated
     ignore_user_abort(true);
@@ -78,6 +79,7 @@ if (constant('FILEACCESS')) {
     echo $ssh->exec('rm -f /' . $_GET['id']);
     echo 'Backup restored';
     echo '</pre>';
+    logevent('User '.$_SESSION['user'].' restored backup', 'activity');
 }
 
 ?>

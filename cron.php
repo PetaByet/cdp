@@ -97,7 +97,26 @@ if ($backupserver['authtype'] == 'password') {
 
 $dirname = 'cdpme-' . date("Y-m-d-H-i-s") . '-' . $backupjob['id'];
 $log .= $ssh->exec('mkdir /tmp/' . $dirname) . PHP_EOL;
-$log .= $ssh->exec('tar -zcvf ' . $dirname . '.tar.gz ' . $backupjob['directory']) . PHP_EOL;
+if ($backupjob['type'] == 'incremental') {
+    $incrementalbackups = json_decode(file_get_contents($config['path']. '/includes/db-backups.json'), true);
+    $incrementalbackups = array_reverse($incrementalbackups);
+    $incrementalbackuparray = array();
+    foreach ($backups as $backup) {
+        if ($backupjob['id'] == $backup['id']) {
+            $incrementalbackuparray[count($incrementalbackuparray)] = $backup;
+        }
+    }
+    if (is_array($incrementalbackuparray[0])) {
+            $incrementaltartime = date("Y-m-d H:i",$incrementalbackuparray[0]['time']);
+    }
+    else {
+        $incrementaltartime = date("Y-m-d H:i", '0');
+    }
+    $log .= $ssh->exec('tar --newer-mtime='.$incrementaltartime.' -zcvf ' . $dirname . '.tar.gz ' . $backupjob['directory']) . PHP_EOL;
+}
+else {
+    $log .= $ssh->exec('tar -zcvf ' . $dirname . '.tar.gz ' . $backupjob['directory']) . PHP_EOL;
+}
 $log .= $ssh->exec('mv ' . $dirname . '.tar.gz /tmp/' . $dirname) . PHP_EOL;
 $log .= $sftp->chdir('/tmp/' . $dirname) . PHP_EOL;
 $sftpfiletransfer = $sftp->get($dirname . '.tar.gz', $dirname . '.tar.gz') . PHP_EOL;

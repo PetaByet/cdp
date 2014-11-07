@@ -2,10 +2,23 @@
 
 if (constant('FILEACCESS')) {
     if (isset($_POST['username']) && isset($_POST['password'])) {
-        if ($_POST['username'] == $config['adminusername'] && md5($_POST['password']) == $config['adminpassword']) {
+        $users = json_decode(file_get_contents($config['path'] . '/includes/db-users.json'), true);
+        $acls = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
+        foreach ($users as $user) {
+            if ($user['username'] == $_POST['username']) {
+                $userdetails = $user;
+            }
+        }
+        if (is_array($userdetails) && md5($_POST['password']) == $userdetails['password']) {
             $_SESSION['user']   = $_POST['username'];
             $_SESSION['ip']     = $_SERVER['REMOTE_ADDR'];
             $_SESSION['time']   = time();
+            foreach ($acls as $acl) {
+                if ($acl['id'] == $user['acl']) {
+                    $_SESSION['acl'] = $acl['perms'];
+                }
+            }
+            logevent('User '.$_SESSION['user'].' logged in', 'activity');
             header('Location: index.php');
             die();
         } else {

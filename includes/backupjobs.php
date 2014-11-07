@@ -1,27 +1,32 @@
 <?php
 
 if (constant('FILEACCESS')) {
-    
+    checkacl('bjpaccess');
     $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
     $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
     if (isset($_REQUEST['backupjob'])) {
         if ($_REQUEST['backupjob'] == 'add' && isset($_REQUEST['source']) && isset($_REQUEST['directory']) && isset($_REQUEST['expiry'])) {
+            checkacl('addjob');
             $id                             = md5(rand() . time() . $_REQUEST['source']);
             $backupjobs[count($backupjobs)] = array(
                 'id' => $id,
                 'source' => $_REQUEST['source'],
                 'directory' => $_REQUEST['directory'],
-                'expiry' => $_REQUEST['expiry']
+                'expiry' => $_REQUEST['expiry'],
+                'type' => $_REQUEST['type']
             );
             file_put_contents($config['path'] . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            logevent('User '.$_SESSION['user'].' added backup job', 'activity');
             header('Location: index.php?action=backupjobs&created=true&id=' . $id);
         } elseif ($_REQUEST['backupjob'] == 'remove' && isset($_REQUEST['id'])) {
+            checkacl('deljob');
             foreach ($backupjobs as $key => $backupjob) {
                 if ($backupjob['id'] == $_REQUEST['id']) {
                     unset($backupjobs[$key]);
                 }
             }
             file_put_contents($config['path'] . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            logevent('User '.$_SESSION['user'].' removed backup job', 'activity');
             header('Location: index.php?action=backupjobs');
         }
     } else {
@@ -50,7 +55,7 @@ if (constant('FILEACCESS')) {
                 echo '<td>' . $backupjob['directory'] . '</td>';
                 echo '<td>' . $backupjob['id'] . '</td>';
                 echo '<td>' . $backupjob['expiry'] . ' Days</td>';
-                echo '<td><a href="index.php?action=viewbackups&id=' . $backupjob['id'] . '" class="btn btn-info">View Backups</a> <a href="index.php?action=backupjobs&backupjob=remove&id=' . $backupjob['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
+                echo '<td><a href="index.php?action=viewbackups&id=' . $backupjob['id'] . '" class="btn btn-info">View Backups</a> <a href="index.php?action=runbackup&id=' . $backupjob['id'] . '" class="btn btn-success">Backup Now</a> <a href="index.php?action=backupjobs&backupjob=remove&id=' . $backupjob['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
             }
         }
 ?>
@@ -84,6 +89,13 @@ if (constant('FILEACCESS')) {
             <label for="inputUsername3" class="col-sm-2 control-label">Backup Auto-Delete (days)</label>
             <div class="col-sm-10">
                 <input type="number" class="form-control" name="expiry" min="1" max="999" value="30" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputUsername3" class="col-sm-2 control-label">Backup Type</label>
+            <div class="col-sm-10">
+                <input type="radio" name="type" value="full" checked> Full
+                <input type="radio" name="type" value="incremental"> Incremental (only backups changed files)
             </div>
         </div>
         <div class="form-group">

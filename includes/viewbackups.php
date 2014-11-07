@@ -1,6 +1,7 @@
 <?php
 
 if (constant('FILEACCESS')) {
+    checkacl('viewbackup');
     function formatBytes($size, $precision = 2)
     {
         $base     = log($size) / log(1024);

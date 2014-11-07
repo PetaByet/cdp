@@ -29,13 +29,22 @@
                 <ul class="nav navbar-nav">
                     <li><a href="index.php">Home</a></li>
 <?php
-if ($loggedin) {
+    if ($loggedin) {
 ?>
                     <li><a href="index.php?action=backupjobs">Backup Jobs</a></li>
-		    <li><a href="index.php?action=backupservers">Servers</a></li>
-		    <li><a href="index.php?action=logout">Log Out</a></li>
+		            <li><a href="index.php?action=backupservers">Servers</a></li>
+		            <li><a href="index.php?action=users">Users</a></li>
+		            <li><a href="index.php?action=useracl">User ACL</a></li>
+		            <li><a href="index.php?action=logout">Log Out</a></li>
 <?php } ?>
                 </ul>
+<?php
+    if ($loggedin) {
+?>
+                <ul class="nav navbar-nav pull-right">
+                    <li><a>Welcome back <?php echo $_SESSION['user']; ?>!</a></li>
+                </ul>
+<?php } ?>
             </div>
         </div>
     </nav>
