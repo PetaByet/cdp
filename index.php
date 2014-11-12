@@ -145,14 +145,8 @@ else {
             //making sure backup job is not terminated
             ignore_user_abort(true);
             set_time_limit(0);
-            echo 'Backup task is running in the background <pre>';
-            if(($fp = popen('php '.$config['path'].'/cron.php '.$_REQUEST['id'].' &', 'r'))) {
-                while(!feof($fp)){
-                    echo fread($fp, 1024);
-                    flush();
-                }
-                fclose($fp);
-            }
+            echo 'Backup task has been started, please do not close this window <pre>';
+            shell_exec('php '.$config['path'].'/cron.php '.$_REQUEST['id']);
             echo '</pre>';
         } else {
             include($config['path'].'/includes/home.php');
