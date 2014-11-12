@@ -146,7 +146,7 @@ else {
             ignore_user_abort(true);
             set_time_limit(0);
             echo 'Backup task has been started, please do not close this window <pre>';
-            shell_exec('php '.$config['path'].'/cron.php '.$_REQUEST['id']);
+            echo shell_exec('php '.$config['path'].'/cron.php '.$_REQUEST['id']);
             echo '</pre>';
         } else {
             include($config['path'].'/includes/home.php');
