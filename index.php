@@ -30,6 +30,13 @@ function checkacl($acl, $noredirect = false) {
     }
 }
 
+function is_md5($md5) {
+    if (isset($md5) && preg_match('/^[a-f0-9]{32}$/', $md5)) {
+        return true;
+    }
+    return false;
+}
+
 function logevent($data, $type) {
     global $config;
     if (empty($_SERVER['REMOTE_ADDR'])) {
@@ -139,14 +146,14 @@ else {
             session_destroy();
             logevent('User '.$_SESSION['user'].' logged out', 'activity');
             header('Location: index.php');
-        } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'runbackup' && isset($_REQUEST['id'])) {
+        } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'runbackup' && isset($_REQUEST['id']) && is_md5($_REQUEST['id'])) {
             checkacl('backnow');
             logevent('User '.$_SESSION['user'].' ran backup job manually', 'activity');
             //making sure backup job is not terminated
             ignore_user_abort(true);
             set_time_limit(0);
             echo 'Backup task has been started, please do not close this window <pre>';
-            echo shell_exec('php '.$config['path'].'/cron.php '.$_REQUEST['id']);
+            echo shell_exec(escapeshellcmd('php '.$config['path'].'/cron.php '.$_REQUEST['id']));
             echo '</pre>';
         } else {
             include($config['path'].'/includes/home.php');

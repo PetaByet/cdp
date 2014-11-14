@@ -59,89 +59,100 @@ if (!$backupserver) {
     exitcron();
 }
 
-set_include_path($config['path'].'/phpseclib');
+if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
+    
+    log .= 'Starting file backup' . PHP_EOL;
+    set_include_path($config['path'].'/phpseclib');
 
-include('Net/SSH2.php');
-include('Net/SFTP.php');
-include('Crypt/RSA.php');
-$ssh  = new Net_SSH2($backupserver['host'], $backupserver['port']);
-$sftp = new Net_SFTP($backupserver['host'], $backupserver['port']);
-if ($backupserver['authtype'] == 'password') {
-    if (!$ssh->login($backupserver['username'], $backupserver['password'])) {
-        $log .= 'SSH password login failed' . PHP_EOL;
-        exitcron();
-    }
-    if (!$sftp->login($backupserver['username'], $backupserver['password'])) {
-        $log .= 'SFTP password login failed' . PHP_EOL;
-        exitcron();
-    }
-} elseif ($backupserver['authtype'] == 'key') {
-    $serverkey = explode(' ', $backupserver['password']);
-    $key = new Crypt_RSA();
-    if (isset($serverkey[1])){
-        $key->setPassword($serverkey[1]);
-    }
-    $key->loadKey(file_get_contents($serverkey[0]));
-    if (!$ssh->login($backupserver['username'], $key)) {
-        $log .= 'SSH key login failed' . PHP_EOL;
-        exitcron();
-    }
-    if (!$sftp->login($backupserver['username'], $key)) {
-        $log .= 'SFTP key login failed' . PHP_EOL;
-        exitcron();
-    }
-} else {
-    $log .= 'SSH login failed' . PHP_EOL;
-    exitcron();
-}
-
-$dirname = 'cdpme-' . date("Y-m-d-H-i-s") . '-' . $backupjob['id'];
-$log .= $ssh->exec('mkdir /tmp/' . $dirname) . PHP_EOL;
-if ($backupjob['type'] == 'incremental') {
-    $incrementalbackups = json_decode(file_get_contents($config['path']. '/includes/db-backups.json'), true);
-    $incrementalbackups = array_reverse($incrementalbackups);
-    $incrementalbackuparray = array();
-    foreach ($backups as $backup) {
-        if ($backupjob['id'] == $backup['id']) {
-            $incrementalbackuparray[count($incrementalbackuparray)] = $backup;
+    include('Net/SSH2.php');
+    include('Net/SFTP.php');
+    include('Crypt/RSA.php');
+    $ssh  = new Net_SSH2($backupserver['host'], $backupserver['port']);
+    $sftp = new Net_SFTP($backupserver['host'], $backupserver['port']);
+    if ($backupserver['authtype'] == 'password') {
+        if (!$ssh->login($backupserver['username'], $backupserver['password'])) {
+            $log .= 'SSH password login failed' . PHP_EOL;
+            exitcron();
         }
+        if (!$sftp->login($backupserver['username'], $backupserver['password'])) {
+            $log .= 'SFTP password login failed' . PHP_EOL;
+            exitcron();
+        }
+    } elseif ($backupserver['authtype'] == 'key') {
+        $serverkey = explode(' ', $backupserver['password']);
+        $key = new Crypt_RSA();
+        if (isset($serverkey[1])){
+            $key->setPassword($serverkey[1]);
+        }
+        $key->loadKey(file_get_contents($serverkey[0]));
+        if (!$ssh->login($backupserver['username'], $key)) {
+            $log .= 'SSH key login failed' . PHP_EOL;
+            exitcron();
+        }
+        if (!$sftp->login($backupserver['username'], $key)) {
+            $log .= 'SFTP key login failed' . PHP_EOL;
+            exitcron();
+        }
+    } else {
+        $log .= 'SSH login failed' . PHP_EOL;
+        exitcron();
     }
-    if (is_array($incrementalbackuparray[0])) {
-            $incrementaltartime = date("Y-m-d H:i",$incrementalbackuparray[0]['time']);
+
+    $dirname = 'cdpme-' . date("Y-m-d-H-i-s") . '-' . $backupjob['id'];
+    $log .= $ssh->exec(escapeshellcmd('mkdir /tmp/' . $dirname)) . PHP_EOL;
+    if ($backupjob['type'] == 'incremental') {
+        $incrementalbackups = json_decode(file_get_contents($config['path']. '/includes/db-backups.json'), true);
+        $incrementalbackups = array_reverse($incrementalbackups);
+        $incrementalbackuparray = array();
+        foreach ($backups as $backup) {
+            if ($backupjob['id'] == $backup['id']) {
+                $incrementalbackuparray[count($incrementalbackuparray)] = $backup;
+            }
+        }
+        if (is_array($incrementalbackuparray[0])) {
+                $incrementaltartime = date("Y-m-d H:i",$incrementalbackuparray[0]['time']);
+        }
+        else {
+            $incrementaltartime = date("Y-m-d H:i", '0');
+        }
+        $log .= $ssh->exec(escapeshellcmd('tar --newer-mtime='.$incrementaltartime.' -zcvf ' . $dirname . '.tar.gz ' . $backupjob['directory'])) . PHP_EOL;
     }
     else {
-        $incrementaltartime = date("Y-m-d H:i", '0');
+        $log .= $ssh->exec(escapeshellcmd('tar -zcvf ' . $dirname . '.tar.gz ' . $backupjob['directory'])) . PHP_EOL;
     }
-    $log .= $ssh->exec('tar --newer-mtime='.$incrementaltartime.' -zcvf ' . $dirname . '.tar.gz ' . $backupjob['directory']) . PHP_EOL;
+    $log .= $ssh->exec(escapeshellcmd('mv ' . $dirname . '.tar.gz /tmp/' . $dirname)) . PHP_EOL;
+    $log .= $sftp->chdir('/tmp/' . $dirname) . PHP_EOL;
+    $sftpfiletransfer = $sftp->get($dirname . '.tar.gz', $dirname . '.tar.gz') . PHP_EOL;
+    if (!$sftpfiletransfer) {
+        $log .= 'File transfer failed' . PHP_EOL;
+        exitcron();
+    } else {
+        $log .= $sftpfiletransfer;
+    }
+    $log .= $ssh->exec(escapeshellcmd('rm -rf /tmp/' . $dirname)) . PHP_EOL;
+    $log .= rename($dirname . '.tar.gz', $config['path'].'/files/' . $dirname . '.tar.gz') . PHP_EOL;
+
+    $timetaken = time() - $starttime;
+
+    $log .= 'Backup completed in ' . $timetaken . ' seconds.' . PHP_EOL;
+
+    $backups[count($backups)] = array(
+        'id' => $backupjob['id'],
+        'file' => $dirname . '.tar.gz',
+        'size' => filesize($config['path'].'/files/' . $dirname . '.tar.gz'),
+        'time' => $starttime
+    );
+
+    file_put_contents($config['path'].'/includes/db-backups.json', json_encode($backups));
+}
+elseif ($backupjob['type'] == 'sql') {
+    log .= 'Starting SQL backup' . PHP_EOL;
 }
 else {
-    $log .= $ssh->exec('tar -zcvf ' . $dirname . '.tar.gz ' . $backupjob['directory']) . PHP_EOL;
-}
-$log .= $ssh->exec('mv ' . $dirname . '.tar.gz /tmp/' . $dirname) . PHP_EOL;
-$log .= $sftp->chdir('/tmp/' . $dirname) . PHP_EOL;
-$sftpfiletransfer = $sftp->get($dirname . '.tar.gz', $dirname . '.tar.gz') . PHP_EOL;
-if (!$sftpfiletransfer) {
-    $log .= 'File transfer failed' . PHP_EOL;
+    log .= 'Backup type not valid' . PHP_EOL;
     exitcron();
-} else {
-    $log .= $sftpfiletransfer;
 }
-$log .= $ssh->exec('rm -rf /tmp/' . $dirname) . PHP_EOL;
-$log .= rename($dirname . '.tar.gz', $config['path'].'/files/' . $dirname . '.tar.gz') . PHP_EOL;
-
-$timetaken = time() - $starttime;
-
-$log .= 'Backup completed in ' . $timetaken . ' seconds.' . PHP_EOL;
-
-$backups[count($backups)] = array(
-    'id' => $backupjob['id'],
-    'file' => $dirname . '.tar.gz',
-    'size' => filesize($config['path'].'/files/' . $dirname . '.tar.gz'),
-    'time' => $starttime
-);
-
-file_put_contents($config['path'].'/includes/db-backups.json', json_encode($backups));
-
+    
 if (isset($backupjob['expiry'])) {
     $backups = json_decode(file_get_contents($config['path'].'/includes/db-backups.json'), true);
     $log .= 'Processing backup auto-delete'. PHP_EOL;
