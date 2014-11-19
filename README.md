@@ -20,6 +20,9 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 * Server authentication using password or RSA key
 * Email notifications
 * Backup rotation / auto delete
+* Full Backups
+* Incremental Backups
+* MySQL Backups
 
 ---------------------------------------
 #### Installation
