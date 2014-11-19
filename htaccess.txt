@@ -10,6 +10,11 @@ Options -Indexes
  deny from all
 </Files>
 
+<Files *.sql>
+ order allow,deny
+ deny from all
+</Files>
+
 <Files *.tar.gz>
  order allow,deny
  deny from all
