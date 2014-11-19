@@ -1,4 +1,20 @@
 ============================
+Beta 1.4 | 19 November 2014
+============================
+Additions
+- SQL Backups
+- Backup Restore Warnings
+Improvements
+- Minor HTML Fixes
+- Beautified Coding
+---
+Upgrade instructions:
+1. Back up the .json databases and files folder
+2. Run the installer
+3. Restore databases and files
+4. Re-configure the config.php file (DO NOT restore the old config.php)
+
+============================
 Beta 1.3 | 7 November 2014
 ============================
 Additions

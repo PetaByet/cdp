@@ -53,10 +53,9 @@ if (constant('FILEACCESS')) {
             );
             
             file_put_contents($config['path'] . '/includes/db-acl.json', json_encode($acls));
-            logevent('User '.$_SESSION['user'].' added ACL', 'activity');
+            logevent('User ' . $_SESSION['user'] . ' added ACL', 'activity');
             header('Location: index.php?action=useracl');
-        }
-        elseif ($_REQUEST['acl'] == 'edit' && isset($_REQUEST['perms']) && isset($_REQUEST['name']) && isset($_REQUEST['aclid']) && is_array($_REQUEST['perms'])) {
+        } elseif ($_REQUEST['acl'] == 'edit' && isset($_REQUEST['perms']) && isset($_REQUEST['name']) && isset($_REQUEST['aclid']) && is_array($_REQUEST['perms'])) {
             checkacl('editacl');
             foreach ($acls as $aclkey => $acl) {
                 if ($acl['id'] == $_REQUEST['aclid']) {
@@ -68,10 +67,9 @@ if (constant('FILEACCESS')) {
                 }
             }
             file_put_contents($config['path'] . '/includes/db-acl.json', json_encode($acls));
-            logevent('User '.$_SESSION['user'].' edited ACL '.$_REQUEST['aclid'], 'activity');
+            logevent('User ' . $_SESSION['user'] . ' edited ACL ' . $_REQUEST['aclid'], 'activity');
             header('Location: index.php?action=useracl');
-        }
-        elseif ($_REQUEST['acl'] == 'remove' && isset($_REQUEST['id'])) {
+        } elseif ($_REQUEST['acl'] == 'remove' && isset($_REQUEST['id'])) {
             checkacl('delacl');
             foreach ($acls as $aclkey => $acl) {
                 if ($acl['id'] == $_REQUEST['id']) {
@@ -79,11 +77,11 @@ if (constant('FILEACCESS')) {
                 }
             }
             file_put_contents($config['path'] . '/includes/db-acl.json', json_encode($acls));
-            logevent('User '.$_SESSION['user'].' removed ACL '.$_REQUEST['id'], 'activity');
+            logevent('User ' . $_SESSION['user'] . ' removed ACL ' . $_REQUEST['id'], 'activity');
             header('Location: index.php?action=useracl');
         }
     } else {
-        include($config['path'].'/includes/header.php');
+        include($config['path'] . '/includes/header.php');
 ?>
 
 <div class="container">
@@ -98,7 +96,7 @@ if (constant('FILEACCESS')) {
                 echo '<td><a href="index.php?action=useracl&id=' . $acl['id'] . '" class="btn btn-info">Edit</a> <a href="index.php?action=useracl&users=remove&id=' . $acl['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
             }
         }
-    ?>
+?>
     </table>
     <?php
         if (isset($_REQUEST['id']) && is_array($acl)) {
@@ -109,23 +107,25 @@ if (constant('FILEACCESS')) {
             }
         }
         if (isset($acldetails) && is_array($acldetails)) {
-    ?>
+?>
     <h3>Edit ACL</h3>
     <form class="form-horizontal" role="form" method="post" action="index.php">
         <input type="hidden" name="action" value="useracl">
         <input type="hidden" name="acl" value="edit">
-        <input type="hidden" name="aclid" value="<?php echo $_REQUEST['id']; ?>">
+        <input type="hidden" name="aclid" value="<?php
+            echo $_REQUEST['id'];
+?>">
         <?php
             foreach ($aclarray as $groupkey => $aclgroup) {
                 echo '<div class="panel panel-default"><div class="panel-heading">';
-                echo '<h4 class="panel-title">'.$groupkey.'</h4></div><div class="panel-body">';
+                echo '<h4 class="panel-title">' . $groupkey . '</h4></div><div class="panel-body">';
                 foreach ($acls as $acl) {
                     if ($acl['id'] == $_REQUEST['id']) {
                         $acldetails = $acl;
                     }
                 }
                 foreach ($aclgroup as $itemkey => $aclitem) {
-                    echo '<div class="col-md-2">'.$aclitem.'</div><div class="col-md-1"><select name="perms['.$itemkey.']">';
+                    echo '<div class="col-md-2">' . $aclitem . '</div><div class="col-md-1"><select name="perms[' . $itemkey . ']">';
                     if ($acldetails['perms'][$itemkey] == 'true') {
                         echo '<option value="true" selected>True</option><option value="false">False</option></select></div>';
                     } else {
@@ -134,11 +134,13 @@ if (constant('FILEACCESS')) {
                 }
                 echo '</div></div>';
             }
-        ?>
+?>
         <div class="form-group">
             <label class="col-sm-2 control-label">ACL Name</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" name="name" value="<?php echo $acldetails['name']; ?>" required>
+                <input type="text" class="form-control" name="name" value="<?php
+            echo $acldetails['name'];
+?>" required>
             </div>
         </div>
         <div class="form-group">
@@ -147,7 +149,9 @@ if (constant('FILEACCESS')) {
             </div>
         </div>
     </form>
-    <?php } else { ?>
+    <?php
+        } else {
+?>
     <h3>Add ACL</h3>
     <form class="form-horizontal" role="form" method="post" action="index.php">
         <input type="hidden" name="action" value="useracl">
@@ -155,14 +159,14 @@ if (constant('FILEACCESS')) {
         <?php
             foreach ($aclarray as $groupkey => $aclgroup) {
                 echo '<div class="panel panel-default"><div class="panel-heading">';
-                echo '<h4 class="panel-title">'.$groupkey.'</h4></div><div class="panel-body">';
+                echo '<h4 class="panel-title">' . $groupkey . '</h4></div><div class="panel-body">';
                 foreach ($aclgroup as $itemkey => $aclitem) {
-                    echo '<div class="col-md-2">'.$aclitem.'</div><div class="col-md-1"><select name="perms['.$itemkey.']">';
+                    echo '<div class="col-md-2">' . $aclitem . '</div><div class="col-md-1"><select name="perms[' . $itemkey . ']">';
                     echo '<option value="true">True</option><option value="false">False</option></select></div>';
                 }
                 echo '</div></div>';
             }
-        ?>
+?>
         <div class="form-group">
             <label class="col-sm-2 control-label">ACL Name</label>
             <div class="col-sm-10">
@@ -175,10 +179,12 @@ if (constant('FILEACCESS')) {
             </div>
         </div>
     </form>
-    <?php } ?>
+    <?php
+        }
+?>
 </div>
 <?php
-        include($config['path'].'/includes/footer.php');
+        include($config['path'] . '/includes/footer.php');
     }
 }
 

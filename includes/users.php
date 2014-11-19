@@ -3,7 +3,7 @@
 if (constant('FILEACCESS')) {
     checkacl('upaccess');
     $users = json_decode(file_get_contents($config['path'] . '/includes/db-users.json'), true);
-    $acls = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
+    $acls  = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
     if (isset($_REQUEST['users'])) {
         if ($_REQUEST['users'] == 'add' && isset($_REQUEST['username']) && isset($_REQUEST['password']) && isset($_REQUEST['acl'])) {
             checkacl('adduser');
@@ -14,25 +14,23 @@ if (constant('FILEACCESS')) {
                 'acl' => $_REQUEST['acl']
             );
             file_put_contents($config['path'] . '/includes/db-users.json', json_encode($users));
-            logevent('User '.$_SESSION['user'].' added user '.$_REQUEST['username'], 'activity');
+            logevent('User ' . $_SESSION['user'] . ' added user ' . $_REQUEST['username'], 'activity');
             header('Location: index.php?action=users');
-        }
-        elseif ($_REQUEST['users'] == 'edit' && isset($_REQUEST['username']) && isset($_REQUEST['userid']) && isset($_REQUEST['acl'])) {
+        } elseif ($_REQUEST['users'] == 'edit' && isset($_REQUEST['username']) && isset($_REQUEST['userid']) && isset($_REQUEST['acl'])) {
             checkacl('edituser');
             foreach ($users as $userkey => $user) {
                 if ($user['id'] == $_REQUEST['userid']) {
                     $users[$userkey]['username'] = $_REQUEST['username'];
-                    $users[$userkey]['acl'] = $_REQUEST['acl'];
+                    $users[$userkey]['acl']      = $_REQUEST['acl'];
                     if (isset($_REQUEST['password'])) {
                         $users[$userkey]['password'] = md5($_REQUEST['password']);
                     }
                 }
             }
             file_put_contents($config['path'] . '/includes/db-users.json', json_encode($users));
-            logevent('User '.$_SESSION['user'].' edited user '.$_REQUEST['username'], 'activity');
+            logevent('User ' . $_SESSION['user'] . ' edited user ' . $_REQUEST['username'], 'activity');
             header('Location: index.php?action=users');
-        }
-        elseif ($_REQUEST['users'] == 'remove' && isset($_REQUEST['id'])) {
+        } elseif ($_REQUEST['users'] == 'remove' && isset($_REQUEST['id'])) {
             checkacl('deluser');
             foreach ($users as $userkey => $user) {
                 if ($user['id'] == $_REQUEST['id']) {
@@ -40,11 +38,11 @@ if (constant('FILEACCESS')) {
                 }
             }
             file_put_contents($config['path'] . '/includes/db-users.json', json_encode($users));
-            logevent('User '.$_SESSION['user'].' removed user', 'activity');
+            logevent('User ' . $_SESSION['user'] . ' removed user', 'activity');
             header('Location: index.php?action=users');
         }
     } else {
-        include($config['path'].'/includes/header.php');
+        include($config['path'] . '/includes/header.php');
 ?>
 
 <div class="container">
@@ -66,7 +64,7 @@ if (constant('FILEACCESS')) {
                 echo '<td><a href="index.php?action=users&id=' . $user['id'] . '" class="btn btn-info">Edit</a> <a href="index.php?action=users&users=remove&id=' . $user['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
             }
         }
-    ?>
+?>
     </table>
     <?php
         if (isset($_REQUEST['id']) && is_array($users)) {
@@ -77,16 +75,20 @@ if (constant('FILEACCESS')) {
             }
         }
         if (isset($userdetails) && is_array($userdetails)) {
-    ?>
+?>
     <h3>Edit user</h3>
     <form class="form-horizontal" role="form" method="post" action="index.php">
         <input type="hidden" name="action" value="users">
         <input type="hidden" name="users" value="edit">
-        <input type="hidden" name="userid" value="<?php echo $_REQUEST['id']; ?>">
+        <input type="hidden" name="userid" value="<?php
+            echo $_REQUEST['id'];
+?>">
         <div class="form-group">
             <label class="col-sm-2 control-label">Username</label>
             <div class="col-sm-10">
-                <input type="text" class="form-control" name="username" value="<?php echo $userdetails['username']; ?>" required>
+                <input type="text" class="form-control" name="username" value="<?php
+            echo $userdetails['username'];
+?>" required>
             </div>
         </div>
         <div class="form-group">
@@ -103,8 +105,7 @@ if (constant('FILEACCESS')) {
             foreach ($acls as $acl) {
                 if ($acl['id'] == $user['acl']) {
                     echo '<option value="' . $acl['id'] . '" selected>' . $acl['name'] . '</option>';
-                }
-                else {
+                } else {
                     echo '<option value="' . $acl['id'] . '">' . $acl['name'] . '</option>';
                 }
             }
@@ -118,7 +119,9 @@ if (constant('FILEACCESS')) {
             </div>
         </div>
     </form>
-    <?php } else { ?>
+    <?php
+        } else {
+?>
     <form class="form-horizontal" role="form" method="post" action="index.php">
         <input type="hidden" name="action" value="users">
         <input type="hidden" name="users" value="add">
@@ -142,8 +145,7 @@ if (constant('FILEACCESS')) {
             foreach ($acls as $acl) {
                 if ($acl['id'] == $user['acl']) {
                     echo '<option value="' . $acl['id'] . '" selected>' . $acl['name'] . '</option>';
-                }
-                else {
+                } else {
                     echo '<option value="' . $acl['id'] . '">' . $acl['name'] . '</option>';
                 }
             }
@@ -157,10 +159,12 @@ if (constant('FILEACCESS')) {
             </div>
         </div>
     </form>
-    <?php } ?>
+    <?php
+        }
+?>
 </div>
 <?php
-        include($config['path'].'/includes/footer.php');
+        include($config['path'] . '/includes/footer.php');
     }
 }
 

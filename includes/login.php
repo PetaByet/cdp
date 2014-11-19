@@ -3,29 +3,29 @@
 if (constant('FILEACCESS')) {
     if (isset($_POST['username']) && isset($_POST['password'])) {
         $users = json_decode(file_get_contents($config['path'] . '/includes/db-users.json'), true);
-        $acls = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
+        $acls  = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
         foreach ($users as $user) {
             if ($user['username'] == $_POST['username']) {
                 $userdetails = $user;
             }
         }
         if (is_array($userdetails) && md5($_POST['password']) == $userdetails['password']) {
-            $_SESSION['user']   = $_POST['username'];
-            $_SESSION['ip']     = $_SERVER['REMOTE_ADDR'];
-            $_SESSION['time']   = time();
+            $_SESSION['user'] = $_POST['username'];
+            $_SESSION['ip']   = $_SERVER['REMOTE_ADDR'];
+            $_SESSION['time'] = time();
             foreach ($acls as $acl) {
                 if ($acl['id'] == $user['acl']) {
                     $_SESSION['acl'] = $acl['perms'];
                 }
             }
-            logevent('User '.$_SESSION['user'].' logged in', 'activity');
+            logevent('User ' . $_SESSION['user'] . ' logged in', 'activity');
             header('Location: index.php');
             die();
         } else {
             header('Location: index.php?login=failed');
         }
     } else {
-        include($config['path'].'/includes/header.php');
+        include($config['path'] . '/includes/header.php');
 ?>
 <div class="container">
     <div class="col-md-6 col-md-offset-3 well">
@@ -57,7 +57,7 @@ if (constant('FILEACCESS')) {
     </div>
 </div>
 <?php
-        include($config['path'].'/includes/footer.php');
+        include($config['path'] . '/includes/footer.php');
     }
 }
 
