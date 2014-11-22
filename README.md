@@ -11,6 +11,8 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 * Web Based Administration Panel
   * Add Backup Servers
   * Add Backup Jobs
+  * Add Users
+  * Add ACL's
   * View Backups
   * Download Backups
   * Restore Backups
@@ -24,6 +26,7 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 * Incremental Backups
 * MySQL Backups
 * OpenVZ Node Backups
+* User accounts / ACL's
 
 ---------------------------------------
 #### Installation
