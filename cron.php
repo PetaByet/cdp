@@ -21,7 +21,32 @@ function exitcron()
     global $log;
     global $config;
     if ($config['sendnotification'] && filter_var($config['adminemail'], FILTER_VALIDATE_EMAIL)) {
-        mail($config['adminemail'], 'CDP.me backup report', wordwrap($log, 70));
+        require $config['path'].'/phpmailer/PHPMailerAutoload.php';
+        $mail = new PHPMailer;
+        if ($config['smtp']) {
+            $mail->isSMTP();
+            $mail->Host = $config['smtpserver'];
+            $mail->SMTPAuth = true;
+            $mail->Username = $config['smtpusername'];
+            $mail->Password = $config['smtppassword'];
+            $mail->SMTPSecure = $config['smtpsecure'];
+            $mail->Port = $config['smtpport'];
+        }
+        $mail->From = $config['emailfrom'];
+        $mail->FromName = 'CDP.me';
+        $mail->addAddress($config['adminemail']);
+        $mail->WordWrap = 50;
+        $mail->AddStringAttachment($log,'log.txt');
+        $mail->isHTML(true);
+        $mail->Subject = 'CDP.me backup report';
+        $mail->Body    = 'Hello!<br />This is your CDP.me backup report at '.date(DATE_RFC822).'.<br/>The backup log is attached.';
+        $mail->AltBody = 'Hello! This is your CDP.me backup report at '.date(DATE_RFC822).'. The backup log is attached.';
+        if(!$mail->send()) {
+            echo 'Message could not be sent.' . PHP_EOL;
+            echo 'Mailer Error: ' . $mail->ErrorInfo . PHP_EOL;
+        } else {
+            echo 'Message has been sent' . PHP_EOL;
+        }
     } else {
         echo $log;
     }
@@ -218,6 +243,99 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     );
     
     file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+} elseif ($backupjob['type'] == 'openvz') {
+    $log .= 'Starting OpenVZ backup' . PHP_EOL;
+    set_include_path($config['path'] . '/phpseclib');
+    
+    include('Net/SSH2.php');
+    include('Net/SFTP.php');
+    include('Crypt/RSA.php');
+    $ssh  = new Net_SSH2($backupserver['host'], $backupserver['port']);
+    $sftp = new Net_SFTP($backupserver['host'], $backupserver['port']);
+    if ($backupserver['authtype'] == 'password') {
+        if (!$ssh->login($backupserver['username'], $backupserver['password'])) {
+            $log .= 'SSH password login failed' . PHP_EOL;
+            exitcron();
+        }
+        if (!$sftp->login($backupserver['username'], $backupserver['password'])) {
+            $log .= 'SFTP password login failed' . PHP_EOL;
+            exitcron();
+        }
+    } elseif ($backupserver['authtype'] == 'key') {
+        $serverkey = explode(' ', $backupserver['password']);
+        $key       = new Crypt_RSA();
+        if (isset($serverkey[1])) {
+            $key->setPassword($serverkey[1]);
+        }
+        $key->loadKey(file_get_contents($serverkey[0]));
+        if (!$ssh->login($backupserver['username'], $key)) {
+            $log .= 'SSH key login failed' . PHP_EOL;
+            exitcron();
+        }
+        if (!$sftp->login($backupserver['username'], $key)) {
+            $log .= 'SFTP key login failed' . PHP_EOL;
+            exitcron();
+        }
+    } else {
+        $log .= 'SSH login failed' . PHP_EOL;
+        exitcron();
+    }
+    
+    $dirname = 'cdpme-' . date("Y-m-d-H-i-s") . '-' . $backupjob['id'];
+    $verifyopenvz = $ssh->exec(escapeshellcmd('vzctl --version'));
+    if (strpos($verifyopenvz,'vzctl version') !== false) {
+        $log .= 'OpenVZ detected' . PHP_EOL;
+    }
+    else {
+        $log .= 'OpenVZ / vzctl not detected' . PHP_EOL;
+        exitcron();
+    }
+    $verifyvzdump = $ssh->exec(escapeshellcmd('vzdump'));
+    if (strpos($verifyvzdump,'command not found') !== false) {
+        $log .= 'vzdump command not found' . PHP_EOL;
+        exitcron();
+    }
+    else {
+        $log .= 'vzdump detected' . PHP_EOL;
+    }
+    $log .= $ssh->exec(escapeshellcmd('mkdir /tmp/' . $dirname)) . PHP_EOL;
+    $sftp->chdir('/tmp/' . $dirname);
+    $containers = $ssh->exec(escapeshellcmd('vzlist -jao ctid'));
+    $containers = json_decode($containers, true);
+    $donotbackup = explode(' ', $backupjob['directory']);
+    $containerstobackup = array();
+    foreach ($containers as $container) {
+        if (!in_array($container['ctid'], $donotbackup)) {
+            $containerstobackup[count($containerstobackup)] = $container['ctid'];
+        }
+    }
+    foreach ($containerstobackup as $container) {
+        $log .= 'Backing up CT '. $container . PHP_EOL;
+        $vzstarttime = time();
+        $log .= $ssh->exec(escapeshellcmd('vzdump --snapshot --compress --dumpdir /tmp/' . $dirname . ' ' .$container)) . PHP_EOL;
+        if (!$sftp->size('vzdump-'.$container.'.tgz')) {
+            $log .= 'vzdump-'.$container.'.tgz not found'. PHP_EOL;
+        }
+        else {
+            $log .= 'CT backup completed, transferring CT '. $container . PHP_EOL;
+            $sftpfiletransfer = $sftp->get('vzdump-'.$container.'.tgz', $dirname . '-vzdump-'.$container.'.tgz') . PHP_EOL;
+            if (!$sftpfiletransfer) {
+                $log .= 'CT transfer failed' . PHP_EOL;
+            } else {
+                $log .= $sftpfiletransfer;
+                $log .= $ssh->exec(escapeshellcmd('rm -f /tmp/' . $dirname.'/vzdump-'.$container.'.tgz')) . PHP_EOL;
+                $log .= rename($dirname . '-vzdump-'.$container.'.tgz', $config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz') . PHP_EOL;
+                $backups[count($backups)] = array(
+                    'id' => $backupjob['id'],
+                    'file' => $dirname . '-vzdump-'.$container.'.tgz',
+                    'size' => filesize($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz'),
+                    'time' => $vzstarttime
+                );
+                file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+            }
+        }
+    }
+    $log .= $ssh->exec(escapeshellcmd('rm -rf /tmp/' . $dirname)) . PHP_EOL;
 } else {
     $log .= 'Backup type not valid' . PHP_EOL;
     exitcron();

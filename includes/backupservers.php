@@ -51,7 +51,7 @@ if (constant('FILEACCESS')) {
    <h2 class="text-center">Add a backup server</h2>
     <div role="tabpanel">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#file" aria-controls="home" role="tab" data-toggle="tab">File</a></li>
+            <li role="presentation" class="active"><a href="#file" aria-controls="home" role="tab" data-toggle="tab">File / OpenVZ</a></li>
             <li role="presentation"><a href="#mysql" aria-controls="mysql" role="tab" data-toggle="tab">MySQL</a></li>
         </ul>
         <div class="tab-content">

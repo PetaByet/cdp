@@ -18,11 +18,12 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 * Json Flat File Database (no MySQL database involved)
 * Backups ran using cron
 * Server authentication using password or RSA key
-* Email notifications
+* Email notifications (sendmail / SMTP)
 * Backup rotation / auto delete
 * Full Backups
 * Incremental Backups
 * MySQL Backups
+* OpenVZ Node Backups
 
 ---------------------------------------
 #### Installation
@@ -39,10 +40,20 @@ The latest version available can be found [here](https://github.com/PetaByet/cdp
 * Backup Server (the server to store all backups)
   * Minimal / Fresh OS Installation
   * Linux
-* Source Server (the server to be backed up)
-  * SSH + SFTP
-  * tar
-  * *99% of servers meet this requirement*
+  
+* Host Server (the server to be backed up)
+  * File
+    * SSH + SFTP
+    * tar
+    * *99% of servers meet this requirement*
+  * MySQL
+    * MySQL 5
+    * `max_allowed_packet` variable larger than db size
+  * OpenVZ
+    * SSH + SFTP
+    * vzdump
+    * lvm2
+    * It is recommended that /vz is a logical volume
   
 ---------------------------------------
 For more information about CDP.me, please visit our wiki at https://github.com/PetaByet/cdp/wiki

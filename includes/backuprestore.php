@@ -82,7 +82,55 @@ if (constant('FILEACCESS')) {
         $database = explode(' ', $backupjob['directory']);
         $db       = new PDO('mysql:host=' . $backupserver['host'] . ';port=' . $backupserver['port'] . ';dbname=' . $database[0] . ';charset=utf8', $backupserver['username'], $backupserver['password']);
         echo $db->exec(file_get_contents($config['path'] . '/files/' . $_GET['id']));
-    } else {
+    } elseif ($backupjob['type'] == 'openvz') {
+        set_include_path($config['path'] . '/phpseclib');
+        include('Net/SSH2.php');
+        include('Net/SFTP.php');
+        include('Crypt/RSA.php');
+        $ssh  = new Net_SSH2($backupserver['host'], $backupserver['port']);
+        $sftp = new Net_SFTP($backupserver['host'], $backupserver['port']);
+        if ($backupserver['authtype'] == 'password') {
+            if (!$ssh->login($backupserver['username'], $backupserver['password'])) {
+                die('SSH password login failed');
+            }
+            if (!$sftp->login($backupserver['username'], $backupserver['password'])) {
+                die('SFTP password login failed');
+            }
+        } elseif ($backupserver['authtype'] == 'key') {
+            $serverkey = explode(' ', $backupserver['password']);
+            $key       = new Crypt_RSA();
+            if (isset($serverkey[1])) {
+                $key->setPassword($serverkey[1]);
+            }
+            $key->loadKey(file_get_contents($serverkey[0]));
+            if (!$ssh->login($backupserver['username'], $key)) {
+                die('SSH key login failed');
+            }
+            if (!$sftp->login($backupserver['username'], $key)) {
+                die('SFTP key login failed');
+            }
+        } else {
+            die('SSH login failed');
+        }
+        $verifyvzdump = $ssh->exec(escapeshellcmd('vzdump'));
+        if (strpos($verifyvzdump,'command not found') !== false) {
+            echo 'vzdump command not found' . PHP_EOL;
+            die();
+        }
+        else {
+            echo 'vzdump detected' . PHP_EOL;
+        }
+        echo $sftp->chdir('/');
+        echo $sftp->put($_GET['id'], $config['path'] . '/files/' . $_GET['id'], NET_SFTP_LOCAL_FILE);
+        $ctid = explode('vzdump-', trim($_GET['id']));
+        $ctid = explode('.tgz', $ctid[1]);
+        echo $ssh->exec('vzctl stop ' . $ctid[0]);
+        echo $ssh->exec('vzctl destroy ' . $ctid[0]);
+        echo $ssh->exec('vzdump --restore /' . $_GET['id'] . ' ' . $ctid[0]);
+        echo $ssh->exec('vzctl start ' . $ctid[0]);
+        echo $ssh->exec('rm -f /' . $_GET['id']);
+    }
+    else {
         die('Backup type not found');
     }
     echo 'Backup restored';

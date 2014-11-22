@@ -47,7 +47,7 @@ if (constant('FILEACCESS')) {
         }
 ?>
 	<table class="table table-striped table-bordered">
-		<tr><th>Source</th><th>Directory</th><th>ID</th><th>Type</th><th>Backup Auto-Delete</th><th>Actions</th></tr>
+		<tr><th>Source</th><th>Dir / DB / Excl.CT</th><th>ID</th><th>Type</th><th>Backup Auto-Delete</th><th>Actions</th></tr>
 <?php
         if (is_array($backupjobs)) {
             foreach ($backupjobs as $backupjob) {
@@ -66,6 +66,7 @@ if (constant('FILEACCESS')) {
             <li role="presentation" class="active"><a href="#full" aria-controls="home" role="tab" data-toggle="tab">Full</a></li>
             <li role="presentation"><a href="#incremental" aria-controls="profile" role="tab" data-toggle="tab">Incremental</a></li>
             <li role="presentation"><a href="#mysql" aria-controls="messages" role="tab" data-toggle="tab">MySQL</a></li>
+            <li role="presentation"><a href="#openvz" aria-controls="messages" role="tab" data-toggle="tab">OpenVZ</a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane fade in active" id="full">
@@ -110,7 +111,7 @@ if (constant('FILEACCESS')) {
                             <input type="number" class="form-control" name="expiry" min="1" max="999" value="30" required>
                         </div>
                     </div>
-                    <input type="hidden" name="type" value="full" checked>
+                    <input type="hidden" name="type" value="full">
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             <button type="submit" class="btn btn-default">Add Job</button>
@@ -151,7 +152,7 @@ if (constant('FILEACCESS')) {
                             <input type="number" class="form-control" name="expiry" min="1" max="999" value="30" required>
                         </div>
                     </div>
-                    <input type="hidden" name="type" value="incremental" checked>
+                    <input type="hidden" name="type" value="incremental">
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             <button type="submit" class="btn btn-default">Add Job</button>
@@ -193,13 +194,57 @@ if (constant('FILEACCESS')) {
                             <input type="number" class="form-control" name="expiry" min="1" max="999" value="30" required>
                         </div>
                     </div>
-                    <input type="hidden" name="type" value="mysql" checked>
+                    <input type="hidden" name="type" value="mysql">
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             <button type="submit" class="btn btn-default">Add Job</button>
                         </div>
                     </div>
                 </form>
+                <div class="alert alert-info">Make sure that the MySQL <code>max_allowed_packet</code> variable is <b>larger</b> than the database size.</div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="openvz">
+               <h3>Add OpenVZ backup job</h3>
+                <form class="form-horizontal" role="form" method="post" action="index.php">
+                    <input type="hidden" name="action" value="backupjobs">
+                    <input type="hidden" name="backupjob" value="add">
+                    <div class="form-group">
+                        <label for="inputUsername3" class="col-sm-2 control-label">Source</label>
+                        <div class="col-sm-10">
+            <?php
+        if (count($fileservers) == 0) {
+            echo '<div class="alert alert-warning">Please add an OpenVZ server first.</div>';
+        } else {
+            echo '<select name="source">';
+            foreach ($fileservers as $backupserver) {
+                echo '<option value="' . $backupserver['host'] . '">' . $backupserver['host'] . '</option>';
+            }
+            echo '</select>';
+        }
+?>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputUsername3" class="col-sm-2 control-label">Excluded CTID's</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="directory" id="inputUsername3" placeholder="101" required>
+                            <p>Enter the container ID's that you do not wish to be backed up, seperated with a space (eg: 101 102 103). Enter 0 to backup all containers.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputUsername3" class="col-sm-2 control-label">Backup Auto-Delete (days)</label>
+                        <div class="col-sm-10">
+                            <input type="number" class="form-control" name="expiry" min="1" max="999" value="30" required>
+                        </div>
+                    </div>
+                    <input type="hidden" name="type" value="openvz">
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-default">Add Job</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="alert alert-info">OpenVZ backup requires vzdump and lvm2. If /vz is not a logical volume, the VPS will be suspended / <b>offline</b> when it's checkpointed. <b>The VPS will stay online if /vz is a logical volume.</b></div>
             </div>
         </div>
     </div>

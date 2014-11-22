@@ -19,17 +19,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 **/
 
-error_reporting(E_ALL); //error reporting
+error_reporting(E_ALL);                                 //error reporting
 ini_set('display_errors', 1);
 
-date_default_timezone_set('UTC'); //set time zone
+date_default_timezone_set('UTC');                       //set time zone
 
 $config                     = array();
-$config['adminemail']       = 'someone@test.com'; //the email address to send notifications to
-$config['sendnotification'] = true; //send email notification (recommended)
-$config['path']             = '/var/www/html'; //script root path
-$config['version']          = 'Beta 1.4'; //script version
-$config['logintimeout']     = '1800'; //inactivity timeout in seconds
-$config['debug']            = false; //debug
+$config['adminemail']       = 'someone@test.com';       //the email address to send notifications to
+$config['sendnotification'] = true;                     //send email notification (recommended)
+$config['emailfrom']        = 'someone@test.com';       //send email from
+$config['smtp']             = false;                    //use smtp to send emails
+$config['smtpserver']       = '';                       //smtp server (only enter if smtp is true)
+$config['smtpusername']     = '';                       //smtp username (only enter if smtp is true)
+$config['smtppassword']     = '';                       //smtp password (only enter if smtp is true)
+$config['smtpsecure']       = 'tls';                    //smtp encryption (tls / ssl)
+$config['smtpport']         = 587;                       //smtp port (only enter if smtp is true)
+$config['path']             = '/var/www/html';          //script root path
+$config['version']          = 'Beta 1.5';               //script version
+$config['logintimeout']     = '1800';                   //inactivity timeout in seconds
+$config['debug']            = false;                    //debug mode
 
 ?>

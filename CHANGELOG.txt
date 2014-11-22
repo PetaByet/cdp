@@ -1,4 +1,20 @@
 ============================
+Beta 1.5 | 19 November 2014
+============================
+Additions
+- OpenVZ Node Backups
+- SMTP email notifications
+- Backup Logs are now sent as email attachments
+Improvements
+- Improved Error Handling
+---
+Upgrade instructions:
+1. Back up the .json databases and files folder
+2. Run the installer
+3. Restore databases and files
+4. Re-configure the config.php file (DO NOT restore the old config.php)
+
+============================
 Beta 1.4 | 19 November 2014
 ============================
 Additions
