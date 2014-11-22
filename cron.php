@@ -217,7 +217,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
                 $return .= 'INSERT INTO ' . $table . ' VALUES(';
                 for ($j = 0; $j < $num_fields; $j++) {
                     $row[$j] = addslashes($row[$j]);
-                    $row[$j] = str_replace("\n", "\\n", $row[$j]);
+                    $row[$j] = preg_replace("/\r\n/","\\r\\n",$row[$j]);
                     if (isset($row[$j])) {
                         $return .= '"' . $row[$j] . '"';
                     } else {

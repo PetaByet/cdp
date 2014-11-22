@@ -51,7 +51,6 @@ The latest version available can be found [here](https://github.com/PetaByet/cdp
     * *99% of servers meet this requirement*
   * MySQL
     * MySQL 5
-    * `max_allowed_packet` variable larger than db size
   * OpenVZ
     * SSH + SFTP
     * vzdump
