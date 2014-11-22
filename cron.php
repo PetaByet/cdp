@@ -152,7 +152,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     }
     $db_selected = mysql_select_db($database[0], $link);
     if (!$db_selected) {
-        $log .= 'MySQL error: ' . mysql_error() . PHP_EOL;
+        $log .= 'MySQL select db error: ' . mysql_error() . PHP_EOL;
         exitcron();
     }
     
@@ -160,7 +160,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         $tables = array();
         $result = mysql_query('SHOW TABLES');
         if (!$result) {
-            $log .= 'MySQL query error: ' . mysql_error() . PHP_EOL;
+            $log .= 'MySQL SHOW TABLES query error: ' . mysql_error() . PHP_EOL;
             exitcron();
         }
         while ($row = mysql_fetch_row($result)) {
@@ -173,7 +173,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     foreach ($tables as $table) {
         $result = mysql_query('SELECT * FROM ' . $table);
         if (!$result) {
-            $log .= 'MySQL query error: ' . mysql_error() . PHP_EOL;
+            $log .= 'MySQL SELECT * FROM query error: ' . mysql_error() . PHP_EOL;
             exitcron();
         }
         $num_fields = mysql_num_fields($result);
@@ -181,7 +181,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         $return = 'DROP TABLE ' . $table . ';';
         $row2   = mysql_query('SHOW CREATE TABLE ' . $table);
         if (!$row2) {
-            $log .= 'MySQL query error: ' . mysql_error() . PHP_EOL;
+            $log .= 'MySQL SHOW CREATE TABLE query error: ' . mysql_error() . PHP_EOL;
             exitcron();
         }
         $row2 = mysql_fetch_row($row2);
