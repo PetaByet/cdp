@@ -26,6 +26,8 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 * Incremental Backups
 * MySQL Backups
 * OpenVZ Node Backups
+* cPanel Account Backups
+* Backup Encryption (AES-256)
 * User accounts / ACL's
 
 ---------------------------------------

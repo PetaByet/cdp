@@ -1,4 +1,22 @@
 ============================
+Beta 1.6 | 24 November 2014
+============================
+Additions
+- cPanel Backups (for single accounts)
+- Proxmox OpenVZ / Standard OpenVZ Detection
+- Backup Encryption (AES-256)
+- Activity Log Viewer
+- Backup Log Viewer
+Improvements
+- Shell Injection Protection
+---
+Upgrade instructions:
+1. Back up the .json databases and files folder
+2. Run the installer
+3. Restore databases and files
+4. Re-configure the config.php file (DO NOT restore the old config.php)
+
+============================
 Beta 1.5 | 22 November 2014
 ============================
 Additions

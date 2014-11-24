@@ -33,9 +33,9 @@ $config['smtpserver']       = '';                       //smtp server (only ente
 $config['smtpusername']     = '';                       //smtp username (only enter if smtp is true)
 $config['smtppassword']     = '';                       //smtp password (only enter if smtp is true)
 $config['smtpsecure']       = 'tls';                    //smtp encryption (tls / ssl)
-$config['smtpport']         = 587;                       //smtp port (only enter if smtp is true)
+$config['smtpport']         = 587;                      //smtp port (only enter if smtp is true)
 $config['path']             = '/var/www/html';          //script root path
-$config['version']          = 'Beta 1.5';               //script version
+$config['version']          = 'Beta 1.6';               //script version
 $config['logintimeout']     = '1800';                   //inactivity timeout in seconds
 $config['debug']            = false;                    //debug mode
 

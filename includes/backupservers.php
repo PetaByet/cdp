@@ -51,8 +51,9 @@ if (constant('FILEACCESS')) {
    <h2 class="text-center">Add a backup server</h2>
     <div role="tabpanel">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#file" aria-controls="home" role="tab" data-toggle="tab">File / OpenVZ</a></li>
+            <li role="presentation" class="active"><a href="#file" aria-controls="file" role="tab" data-toggle="tab">File / OpenVZ</a></li>
             <li role="presentation"><a href="#mysql" aria-controls="mysql" role="tab" data-toggle="tab">MySQL</a></li>
+            <li role="presentation"><a href="#cpanel" aria-controls="cpanel" role="tab" data-toggle="tab">cPanel</a></li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane fade in active" id="file">  
@@ -99,7 +100,7 @@ if (constant('FILEACCESS')) {
                 </form>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="mysql">
-                                <form class="form-horizontal" role="form" method="post" action="index.php">
+                <form class="form-horizontal" role="form" method="post" action="index.php">
                     <input type="hidden" name="action" value="backupservers">
                     <input type="hidden" name="backupserver" value="add">
                     <div class="form-group">
@@ -125,6 +126,42 @@ if (constant('FILEACCESS')) {
                         <label for="inputPassword3" class="col-sm-2 control-label">MySQL Password</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-control" name="password" id="inputPassword3" placeholder="mysql password" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-default">Add Server</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="cpanel">
+                <form class="form-horizontal" role="form" method="post" action="index.php">
+                    <input type="hidden" name="action" value="backupservers">
+                    <input type="hidden" name="backupserver" value="add">
+                    <div class="form-group">
+                        <label for="inputUsername3" class="col-sm-2 control-label">cPanel Host</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="host" id="inputUsername3" placeholder="cpanel.cdp.me" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputUsername3" class="col-sm-2 control-label">cPanel Port</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="port" id="inputUsername3" placeholder="2083" required>
+                        </div>
+                    </div>
+                    <input type="hidden" name="authtype" value="cpanel">
+                    <div class="form-group">
+                        <label for="inputUsername3" class="col-sm-2 control-label">cPanel Username</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="username" id="inputUsername3" placeholder="username" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword3" class="col-sm-2 control-label">cPanel Password</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="password" id="inputPassword3" placeholder="password" required>
                         </div>
                     </div>
                     <div class="form-group">

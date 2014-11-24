@@ -87,12 +87,20 @@ if (constant('FILEACCESS')) {
         echo '<tr><th>Data</th><th>Time</th><th>IP</th></tr>';
         for ($i = 0; $i < 10; $i++) {
             if (isset($activitylogs[$i]) && is_array($activitylogs[$i])) {
-                echo '<tr><td>' . $activitylogs[$i]['data'] . '</td><td>' . date("Y-m-d H:i:s", $activitylogs[$i]['time']) . '</td><td>' . $activitylogs[$i]['ip'] . '</td></tr>';
+                echo '<tr><td>';
+                if (strlen($activitylogs[$i]['data']) > 50) {
+                    $stringCut = substr($activitylogs[$i]['data'], 0, 50);
+                    echo substr($stringCut, 0, strrpos($stringCut, ' ')).'...';
+                } else {
+                    echo $activitylogs[$i]['data'];
+                }
+                echo'</td><td>' . date("Y-m-d H:i:s", $activitylogs[$i]['time']) . '</td><td>' . $activitylogs[$i]['ip'] . '</td></tr>';
             } else {
                 echo '<tr><td>-</td><td>-</td><td>-</td></tr>';
             }
         }
         echo '</table>';
+        echo '<a href="index.php?action=activitylogs" class="btn btn-info">View All</a>';
 ?>
     </div>
     <?php
@@ -116,6 +124,7 @@ if (constant('FILEACCESS')) {
             }
         }
         echo '</table>';
+        echo '<a href="index.php?action=backuplogs" class="btn btn-info">View All</a>';
 ?>
     </div>
     <?php

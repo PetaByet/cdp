@@ -16,8 +16,24 @@ if (constant('FILEACCESS')) {
     }
     $backups = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
     $backups = array_reverse($backups); //reverse the array to make newest backups at the top
+    $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+    function GetJobDetails($jobid)
+    {
+        global $backupjobs;
+        foreach ($backupjobs as $backupjob) {
+            if ($backupjob['id'] == $jobid) {
+                return $backupjob;
+            }
+        }
+        return false;
+    }
+    $backupjob = GetJobDetails($_GET['id']);
     include($config['path'] . '/includes/header.php');
     echo '<div class="container"><h2>View Backups</h2>';
+    if ($backupjob['encryption'] == 'AES-256') {
+        echo '<div class="alert alert-info">It may take a little longer to download decrypted files, please be patient!</div>';
+    }
     echo '<table class="table table-striped table-bordered">';
     echo '<tr><th>File</th><th>Size</th><th>Time</th><th>Actions</th>';
     foreach ($backups as $backup) {
@@ -25,8 +41,11 @@ if (constant('FILEACCESS')) {
             echo '<tr><td>' . $backup['file'] . '</td>';
             echo '<td>' . formatBytes($backup['size']) . '</td>';
             echo '<td>' . date("Y-m-d H:i:s", $backup['time']) . '</td>';
-            echo '<td><a href="index.php?action=backupdownload&id=' . $backup['file'] . '" class="btn btn-success">Download</a>
-            <a href="#" onclick="ConfirmRestore(\'index.php?action=backuprestore&id=' . $backup['file'] . '\')" class="btn btn-info">Restore</a>
+            echo '<td><a href="index.php?action=backupdownload&id=' . $backup['file'] . '" class="btn btn-success">Download</a> ';
+            if ($backupjob['encryption'] == 'AES-256') {
+                echo '<a href="index.php?action=backupdownloaddecrypt&id=' . $backup['file'] . '" class="btn btn-success">Download (Decrypted)</a> ';
+            }
+            echo '<a href="#" onclick="ConfirmRestore(\'index.php?action=backuprestore&id=' . $backup['file'] . '\')" class="btn btn-info">Restore</a>
             <a href="index.php?action=backupdelete&id=' . $backup['file'] . '" class="btn btn-danger">Delete</a></td></tr>';
         }
     }

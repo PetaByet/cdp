@@ -109,6 +109,7 @@ if (constant('FILEACCESS')) {
         if (isset($acldetails) && is_array($acldetails)) {
 ?>
     <h3>Edit ACL</h3>
+    <div class="alert alert-info">ACL changes will take effect the next time the user logs in.</div>
     <form class="form-horizontal" role="form" method="post" action="index.php">
         <input type="hidden" name="action" value="useracl">
         <input type="hidden" name="acl" value="edit">

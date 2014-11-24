@@ -115,6 +115,43 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
             } else {
                 echo 'File not found';
             }
+        } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backupdownloaddecrypt' && isset($_REQUEST['id'])) {
+            checkacl('downloadb');
+            if (file_exists($config['path'] . '/files/' . $_REQUEST['id']) == 1) {
+                $backups       = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
+                $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
+                function GetBackupDetails($backupdata)
+                {
+                    global $backups;
+                    foreach ($backups as $backup) {
+                        if ($backup['file'] == $backupdata) {
+                            return $backup;
+                        }
+                    }
+                    return false;
+                }
+                function GetJobDetails($jobid)
+                {
+                    global $backupjobs;
+                    foreach ($backupjobs as $backupjob) {
+                        if ($backupjob['id'] == $jobid) {
+                            return $backupjob;
+                        }
+                    }
+                    return false;
+                }
+                $backup       = GetBackupDetails($_REQUEST['id']);
+                $backupjob    = GetJobDetails($backup['id']);
+                header('Content-Disposition: attachment; filename="' . basename($_REQUEST['id']) . '"');
+                set_include_path($config['path'] . '/libs/phpseclib');
+                include('Crypt/AES.php');
+                $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
+                $cipher->setKey($backupjob['encryptionkey']);
+                echo $cipher->decrypt(file_get_contents($config['path'] . '/files/' . $_REQUEST['id']));
+                logevent('User ' . $_SESSION['user'] . ' downloaded decrypted backup ' . $_REQUEST['id'], 'activity');
+            } else {
+                echo 'File not found';
+            }
         } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backupdelete' && isset($_REQUEST['id'])) {
             checkacl('deleteb');
             if (file_exists($config['path'] . '/files/' . $_REQUEST['id'])) {
@@ -151,6 +188,42 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
             echo 'Backup task has been started, please do not close this window <pre>';
             echo shell_exec(escapeshellcmd('php ' . $config['path'] . '/cron.php ' . $_REQUEST['id']));
             echo '</pre>';
+        } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'activitylogs') {
+            checkacl('alog');
+            include($config['path'] . '/includes/header.php');
+            echo '<h4>Activity Logs</h4>';
+            $activitylogs = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
+            $activitylogs = array_reverse($activitylogs);
+            echo '<table class="table table-bordered table-striped">';
+            echo '<tr><th>Data</th><th>Time</th><th>IP</th></tr>';
+            foreach ($activitylogs as $i => $log) {
+                if (isset($activitylogs[$i]) && is_array($activitylogs[$i])) {
+                    echo '<tr><td>';
+                    echo $activitylogs[$i]['data'];
+                    echo'</td><td>' . date("Y-m-d H:i:s", $activitylogs[$i]['time']) . '</td><td>' . $activitylogs[$i]['ip'] . '</td></tr>';
+                } else {
+                    echo '<tr><td>-</td><td>-</td><td>-</td></tr>';
+                }
+            }
+            echo '</table>';
+            include($config['path'] . '/includes/footer.php');
+        } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backuplogs') {
+            checkacl('blog');
+            include($config['path'] . '/includes/header.php');
+            echo '<h4>Backup Logs</h4>';
+            $backuplogs = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
+            $backuplogs = array_reverse($backuplogs);
+            echo '<table class="table table-bordered table-striped">';
+            echo '<tr><th>Data</th><th>Time</th><th>IP</th></tr>';
+            foreach ($backuplogs as $i => $log) {
+                if (isset($backuplogs[$i]) && is_array($backuplogs[$i])) {
+                    echo '<tr><td>' . $backuplogs[$i]['data'] . '</td><td>' . date("Y-m-d H:i:s", $backuplogs[$i]['time']) . '</td><td>' . $backuplogs[$i]['ip'] . '</td></tr>';
+                } else {
+                    echo '<tr><td>-</td><td>-</td><td>-</td></tr>';
+                }
+            }
+            echo '</table>';
+            include($config['path'] . '/includes/footer.php');
         } else {
             include($config['path'] . '/includes/home.php');
         }

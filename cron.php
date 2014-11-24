@@ -21,7 +21,7 @@ function exitcron()
     global $log;
     global $config;
     if ($config['sendnotification'] && filter_var($config['adminemail'], FILTER_VALIDATE_EMAIL)) {
-        require $config['path'].'/phpmailer/PHPMailerAutoload.php';
+        require $config['path'].'/libs/phpmailer/PHPMailerAutoload.php';
         $mail = new PHPMailer;
         if ($config['smtp']) {
             $mail->isSMTP();
@@ -51,6 +51,36 @@ function exitcron()
         echo $log;
     }
     die();
+}
+function logevent($data, $type)
+{
+    global $config;
+    if (empty($_SERVER['REMOTE_ADDR'])) {
+        $ipaddr = 'Not found';
+    } else {
+        $ipaddr = $_SERVER['REMOTE_ADDR'];
+    }
+    if (isset($data) && isset($type)) {
+        if ($type == 'activity') {
+            $activitylogs                       = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
+            $activitylogs[count($activitylogs)] = array(
+                'id' => count($activitylogs) + 1,
+                'data' => trim($data),
+                'time' => time(),
+                'ip' => $ipaddr
+            );
+            file_put_contents($config['path'] . '/includes/db-activitylog.json', json_encode($activitylogs));
+        } elseif ($type == 'backup') {
+            $backuplogs                     = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
+            $backuplogs[count($backuplogs)] = array(
+                'id' => count($backuplogs) + 1,
+                'data' => trim($data),
+                'time' => time(),
+                'ip' => $ipaddr
+            );
+            file_put_contents($config['path'] . '/includes/db-backuplog.json', json_encode($backuplogs));
+        }
+    }
 }
 function GetJobDetails($jobid)
 {
@@ -86,11 +116,12 @@ if (!$backupserver) {
 if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     
     $log .= 'Starting file backup' . PHP_EOL;
-    set_include_path($config['path'] . '/phpseclib');
+    set_include_path($config['path'] . '/libs/phpseclib');
     
     include('Net/SSH2.php');
     include('Net/SFTP.php');
     include('Crypt/RSA.php');
+    include('Crypt/AES.php');
     $ssh  = new Net_SSH2($backupserver['host'], $backupserver['port']);
     $sftp = new Net_SFTP($backupserver['host'], $backupserver['port']);
     if ($backupserver['authtype'] == 'password') {
@@ -153,7 +184,12 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     }
     $log .= $ssh->exec(escapeshellcmd('rm -rf /tmp/' . $dirname)) . PHP_EOL;
     $log .= rename($dirname . '.tar.gz', $config['path'] . '/files/' . $dirname . '.tar.gz') . PHP_EOL;
-    
+    if (isset($backupjob['encryption']) && $backupjob['encryption'] = 'AES-256') {
+        $log .= 'Encrypting file with AES-256'.PHP_EOL;
+        $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
+        $cipher->setKey($backupjob['encryptionkey']);
+        file_put_contents($config['path'] . '/files/' . $dirname . '.tar.gz', $cipher->encrypt(file_get_contents($config['path'] . '/files/' . $dirname . '.tar.gz')));
+    }
     $backups[count($backups)] = array(
         'id' => $backupjob['id'],
         'file' => $dirname . '.tar.gz',
@@ -163,6 +199,8 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     
     file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
 } elseif ($backupjob['type'] == 'mysql') {
+    set_include_path($config['path'] . '/libs/phpseclib');
+    include('Crypt/AES.php');
     $log .= 'Starting SQL backup' . PHP_EOL;
     $database = explode(' ', $backupjob['directory']);
     if (isset($database[1])) {
@@ -233,7 +271,14 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         $return .= "\n\n\n";
     }
     $backupname = 'cdpme-' . date("Y-m-d-H-i-s") . '-' . $backupjob['id'] . '.sql';
-    file_put_contents($config['path'] . '/files/' . $backupname, $return);
+    if (isset($backupjob['encryption']) && $backupjob['encryption'] = 'AES-256') {
+        $log .= 'Encrypting file with AES-256'.PHP_EOL;
+        $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
+        $cipher->setKey($backupjob['encryptionkey']);
+        file_put_contents($config['path'] . '/files/' . $backupname, $cipher->encrypt($return));
+    } else {
+        file_put_contents($config['path'] . '/files/' . $backupname, $return);
+    }
     
     $backups[count($backups)] = array(
         'id' => $backupjob['id'],
@@ -245,11 +290,12 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
 } elseif ($backupjob['type'] == 'openvz') {
     $log .= 'Starting OpenVZ backup' . PHP_EOL;
-    set_include_path($config['path'] . '/phpseclib');
+    set_include_path($config['path'] . '/libs/phpseclib');
     
     include('Net/SSH2.php');
     include('Net/SFTP.php');
     include('Crypt/RSA.php');
+    include('Crypt/AES.php');
     $ssh  = new Net_SSH2($backupserver['host'], $backupserver['port']);
     $sftp = new Net_SFTP($backupserver['host'], $backupserver['port']);
     if ($backupserver['authtype'] == 'password') {
@@ -285,8 +331,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     $verifyopenvz = $ssh->exec(escapeshellcmd('vzctl --version'));
     if (strpos($verifyopenvz,'vzctl version') !== false) {
         $log .= 'OpenVZ detected' . PHP_EOL;
-    }
-    else {
+    } else {
         $log .= 'OpenVZ / vzctl not detected' . PHP_EOL;
         exitcron();
     }
@@ -294,9 +339,16 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     if (strpos($verifyvzdump,'command not found') !== false) {
         $log .= 'vzdump command not found' . PHP_EOL;
         exitcron();
-    }
-    else {
+    } else {
         $log .= 'vzdump detected' . PHP_EOL;
+    }
+    $verifyproxmox = $ssh->exec(escapeshellcmd('pveversion -v'));
+    if (strpos($verifyproxmox, 'pve') !== false) {
+        $log .= 'ProxMox detected'.PHP_EOL;
+        $isproxmox = true;
+    } else {
+        $log .= 'Standard OpenVZ detected'.PHP_EOL;
+        $isproxmox = false;
     }
     $log .= $ssh->exec(escapeshellcmd('mkdir /tmp/' . $dirname)) . PHP_EOL;
     $sftp->chdir('/tmp/' . $dirname);
@@ -312,7 +364,11 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     foreach ($containerstobackup as $container) {
         $log .= 'Backing up CT '. $container . PHP_EOL;
         $vzstarttime = time();
-        $log .= $ssh->exec(escapeshellcmd('vzdump --snapshot --compress --dumpdir /tmp/' . $dirname . ' ' .$container)) . PHP_EOL;
+        if ($isproxmox) {
+            $log .= $ssh->exec(escapeshellcmd('vzdump -mode snapshot --compress --dumpdir /tmp/' . $dirname . ' ' .$container)) . PHP_EOL;
+        } else {
+            $log .= $ssh->exec(escapeshellcmd('vzdump --snapshot --compress --dumpdir /tmp/' . $dirname . ' ' .$container)) . PHP_EOL;
+        }
         if (!$sftp->size('vzdump-'.$container.'.tgz')) {
             $log .= 'vzdump-'.$container.'.tgz not found'. PHP_EOL;
         }
@@ -325,6 +381,12 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
                 $log .= $sftpfiletransfer;
                 $log .= $ssh->exec(escapeshellcmd('rm -f /tmp/' . $dirname.'/vzdump-'.$container.'.tgz')) . PHP_EOL;
                 $log .= rename($dirname . '-vzdump-'.$container.'.tgz', $config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz') . PHP_EOL;
+                if (isset($backupjob['encryption']) && $backupjob['encryption'] = 'AES-256') {
+                    $log .= 'Encrypting file with AES-256'.PHP_EOL;
+                    $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
+                    $cipher->setKey($backupjob['encryptionkey']);
+                    file_put_contents($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz', $cipher->encrypt(file_get_contents($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz')));
+                }
                 $backups[count($backups)] = array(
                     'id' => $backupjob['id'],
                     'file' => $dirname . '-vzdump-'.$container.'.tgz',
@@ -336,6 +398,93 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         }
     }
     $log .= $ssh->exec(escapeshellcmd('rm -rf /tmp/' . $dirname)) . PHP_EOL;
+} elseif ($backupjob['type'] == 'cpanel') {
+    $log .= 'Starting cPanel backup'.PHP_EOL;
+    require $config['path'].'/libs/cpanelxmlapi-php/xmlapi.php';
+    require $config['path'].'/libs/simplehtml/simple_html_dom.php';
+    set_include_path($config['path'] . '/libs/phpseclib');
+    include('Crypt/AES.php');
+    $xmlapi = new xmlapi($backupserver['host']);
+    $xmlapi->set_port($backupserver['port']);
+    $xmlapi->password_auth($backupserver['username'], $backupserver['password']);
+    $xmlapi->set_output('json');
+    $xmlresult = json_decode($xmlapi->api1_query($backupserver['username'],'Fileman','fullbackup',array('homedir')), true);
+    $cpstarttime = time();
+    if ($xmlresult['event']['result'] == 1) {
+        $log .=  'Backup started, waiting for it to finish'.PHP_EOL;
+        $backupavailable = false;
+        while(!$backupavailable) {
+            $xmlresult = json_decode($xmlapi->api1_query($backupserver['username'],'Fileman','listfullbackups'), true);
+            if (strpos($xmlresult['data']['result'],'okmsg') !== false) {
+                $log .=  'Backup found, continuing'.PHP_EOL;
+                $html = str_get_html($xmlresult['data']['result']);
+                $latestbackup = $html->find('div[class=okmsg]', -1)->find('a', -1)->plaintext;
+                $backupavailable = true;
+            }
+            else {
+                $log .=  'Backup is not available yet, waiting 30 seconds and re-try.'.PHP_EOL;
+                sleep(30);
+                $log .= 'Re-trying'.PHP_EOL;
+            }
+        }
+        $filename = 'cdpme-' . date("Y-m-d-H-i-s") . '-' . $latestbackup;
+        $log .= 'Creating temporary FTP account for backup transfer'.PHP_EOL;
+        $tempftpuser = 'cdpme'.rand(100,999);
+        $tempftppw = rand().time();
+        $createftp = json_decode($xmlapi->api2_query($backupserver['username'], 'Ftp', 'addftp',array('user' => $tempftpuser, 'pass' => $tempftppw, 'quota' => 0, 'homedir' => '/')), true);
+        if ($createftp['cpanelresult']['data'][0]['result'] == 1) {
+            $log .= 'Temporary FTP Account created'.PHP_EOL;;
+        } else {
+            $log .= 'Unable to create FTP account. The error returned was: '.$createftp['cpanelresult']['error'].PHP_EOL;;
+            exitcron();
+        }
+        $maindomain = json_decode($xmlapi->api2_query($backupserver['username'], 'ZoneEdit','fetch_cpanel_generated_domains'), true);
+        $maindomain = chop($maindomain['cpanelresult']['data'][count($maindomain['cpanelresult']['data'])-1]['domain'], '.');
+        $ftp_connect = ftp_connect($backupserver['host']) or exitcron();
+        $ftp_login = ftp_login($ftp_connect, $tempftpuser.'@'.$maindomain, $tempftppw);
+        if (ftp_get($ftp_connect, $filename, $latestbackup, FTP_BINARY)) {
+            $log .=  'Backup downloaded, deleting from the cPanel server'.PHP_EOL;
+        } else {
+            $log .=  'Error downloading backup'.PHP_EOL;
+            exitcron();
+        }
+        ftp_close($ftp_connect);
+        $log .= rename($filename, $config['path'] . '/files/' . $filename) . PHP_EOL;
+        $xmlresult = json_decode($xmlapi->api1_query($backupserver['username'],'Fileman','delfile',array('/',$latestbackup)), true);
+        if ($xmlresult['event']['result'] == 1) {
+            $log .=  'Backup deleted.'.PHP_EOL;
+        }
+        else {
+            $log .=  'Backup not deleted form the cPanel server, exiting...'.PHP_EOL;
+            exitcron();
+        }
+        $xmlapi->api1_query($backupserver['username'],'Fileman','Empty Trash');
+        $deleteftp = json_decode($xmlapi->api2_query($backupserver['username'], 'Ftp', 'delftp',array('user' => $tempftpuser)), true);
+        $log .= 'Deleting temporary FTP account for backup transfer'.PHP_EOL;
+        if ($deleteftp['cpanelresult']['data'][0]['result'] == 1) {
+            $log .= 'Temporary FTP Account deleted'.PHP_EOL;;
+        } else {
+            $log .= 'Unable to delete FTP account. The error returned was: '.$deleteftp['cpanelresult']['error'].PHP_EOL;;
+            exitcron();
+        }
+        if (isset($backupjob['encryption']) && $backupjob['encryption'] = 'AES-256') {
+            $log .= 'Encrypting file with AES-256'.PHP_EOL;
+            $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
+            $cipher->setKey($backupjob['encryptionkey']);
+            file_put_contents($config['path'] . '/files/' . $filename, $cipher->encrypt(file_get_contents($config['path'] . '/files/' . $filename)));
+        }
+        $backups[count($backups)] = array(
+            'id' => $backupjob['id'],
+            'file' => $filename,
+            'size' => filesize($config['path'] . '/files/' . $filename),
+            'time' => $cpstarttime
+        );
+        file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+    }
+    else {
+        $log .=  'Backup failed';
+        exitcron();
+    }
 } else {
     $log .= 'Backup type not valid' . PHP_EOL;
     exitcron();
@@ -361,6 +510,8 @@ if (isset($backupjob['expiry'])) {
     }
     file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
 }
+
+logevent('Backup for '.$backupserver['host'].' completed.', 'backup');
 
 exitcron();
 
