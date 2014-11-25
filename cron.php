@@ -365,7 +365,8 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         $log .= 'Backing up CT '. $container . PHP_EOL;
         $vzstarttime = time();
         if ($isproxmox) {
-            $log .= $ssh->exec(escapeshellcmd('vzdump -mode snapshot --compress --dumpdir /tmp/' . $dirname . ' ' .$container)) . PHP_EOL;
+            $log .= $ssh->exec(escapeshellcmd('vzdump -mode snapshot -compress gzip -dumpdir /tmp/' . $dirname . ' ' .$container)) . PHP_EOL;
+            $log .= $ssh->exec(escapeshellcmd('mv vzdump-openvz-*.tgz vzdump-'.$container.'.tgz')) . PHP_EOL;
         } else {
             $log .= $ssh->exec(escapeshellcmd('vzdump --snapshot --compress --dumpdir /tmp/' . $dirname . ' ' .$container)) . PHP_EOL;
         }
