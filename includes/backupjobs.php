@@ -128,7 +128,7 @@ if (constant('FILEACCESS')) {
                     <div class="form-group">
                         <label for="inputUsername3" class="col-sm-2 control-label">Encryption Password</label>
                         <div class="col-sm-10">
-                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password" required>
+                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password">
                             <p>Only enter if you plan to encrypt your backups.</p>
                         </div>
                     </div>
@@ -188,7 +188,7 @@ if (constant('FILEACCESS')) {
                     <div class="form-group">
                         <label for="inputUsername3" class="col-sm-2 control-label">Encryption Password</label>
                         <div class="col-sm-10">
-                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password" required>
+                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password">
                             <p>Only enter if you plan to encrypt your backups.</p>
                         </div>
                     </div>
@@ -243,7 +243,7 @@ if (constant('FILEACCESS')) {
                     <div class="form-group">
                         <label for="inputUsername3" class="col-sm-2 control-label">Encryption Password</label>
                         <div class="col-sm-10">
-                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password" required>
+                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password">
                             <p>Only enter if you plan to encrypt your backups.</p>
                         </div>
                     </div>
@@ -299,7 +299,7 @@ if (constant('FILEACCESS')) {
                     <div class="form-group">
                         <label for="inputUsername3" class="col-sm-2 control-label">Encryption Password</label>
                         <div class="col-sm-10">
-                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password" required>
+                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password">
                             <p>Only enter if you plan to encrypt your backups.</p>
                         </div>
                     </div>
@@ -349,7 +349,7 @@ if (constant('FILEACCESS')) {
                     <div class="form-group">
                         <label for="inputUsername3" class="col-sm-2 control-label">Encryption Password</label>
                         <div class="col-sm-10">
-                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password" required>
+                            <input type="password" class="form-control" name="encryptionpassword" id="inputUsername3" placeholder="password">
                             <p>Only enter if you plan to encrypt your backups.</p>
                         </div>
                     </div>
