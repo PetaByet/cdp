@@ -184,11 +184,17 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     }
     $log .= $ssh->exec(escapeshellcmd('rm -rf /tmp/' . $dirname)) . PHP_EOL;
     $log .= rename($dirname . '.tar.gz', $config['path'] . '/files/' . $dirname . '.tar.gz') . PHP_EOL;
-    if (isset($backupjob['encryption']) && $backupjob['encryption'] = 'AES-256') {
+    if (isset($backupjob['encryption']) && $backupjob['encryption'] == 'AES-256') {
         $log .= 'Encrypting file with AES-256'.PHP_EOL;
         $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
         $cipher->setKey($backupjob['encryptionkey']);
         file_put_contents($config['path'] . '/files/' . $dirname . '.tar.gz', $cipher->encrypt(file_get_contents($config['path'] . '/files/' . $dirname . '.tar.gz')));
+    } elseif (isset($backupjob['encryption']) && $backupjob['encryption'] == 'GPG') {
+        $log .= 'Encrypting file with GPG'.PHP_EOL;
+        require_once $config['path'].'/libs/php-gpg-master/GPG.php';
+        $gpg = new GPG();
+        $pub_key = new GPG_Public_Key(file_get_contents($backupjob['encryptionkey']));
+        file_put_contents($config['path'] . '/files/' . $dirname . '.tar.gz', $gpg->encrypt(file_get_contents($config['path'] . '/files/' . $dirname . '.tar.gz')));
     }
     $backups[count($backups)] = array(
         'id' => $backupjob['id'],
@@ -276,6 +282,12 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
         $cipher->setKey($backupjob['encryptionkey']);
         file_put_contents($config['path'] . '/files/' . $backupname, $cipher->encrypt($return));
+    } elseif (isset($backupjob['encryption']) && $backupjob['encryption'] == 'GPG') {
+        $log .= 'Encrypting file with GPG'.PHP_EOL;
+        require_once $config['path'].'/libs/php-gpg-master/GPG.php';
+        $gpg = new GPG();
+        $pub_key = new GPG_Public_Key(file_get_contents($backupjob['encryptionkey']));
+        file_put_contents($config['path'] . '/files/' . $backupname, $gpg->encrypt($return));
     } else {
         file_put_contents($config['path'] . '/files/' . $backupname, $return);
     }
@@ -387,6 +399,12 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
                     $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
                     $cipher->setKey($backupjob['encryptionkey']);
                     file_put_contents($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz', $cipher->encrypt(file_get_contents($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz')));
+                } elseif (isset($backupjob['encryption']) && $backupjob['encryption'] == 'GPG') {
+                    $log .= 'Encrypting file with GPG'.PHP_EOL;
+                    require_once $config['path'].'/libs/php-gpg-master/GPG.php';
+                    $gpg = new GPG();
+                    $pub_key = new GPG_Public_Key(file_get_contents($backupjob['encryptionkey']));
+                    file_put_contents($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz', $gpg->encrypt(file_get_contents($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz')));
                 }
                 $backups[count($backups)] = array(
                     'id' => $backupjob['id'],
@@ -473,6 +491,12 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
             $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
             $cipher->setKey($backupjob['encryptionkey']);
             file_put_contents($config['path'] . '/files/' . $filename, $cipher->encrypt(file_get_contents($config['path'] . '/files/' . $filename)));
+        } elseif (isset($backupjob['encryption']) && $backupjob['encryption'] == 'GPG') {
+            $log .= 'Encrypting file with GPG'.PHP_EOL;
+            require_once $config['path'].'/libs/php-gpg-master/GPG.php';
+            $gpg = new GPG();
+            $pub_key = new GPG_Public_Key(file_get_contents($backupjob['encryptionkey']));
+            file_put_contents($config['path'] . '/files/' . $filename, $gpg->encrypt(file_get_contents($config['path'] . '/files/' . $filename)));
         }
         $backups[count($backups)] = array(
             'id' => $backupjob['id'],

@@ -18,6 +18,17 @@ if (constant('FILEACCESS')) {
                     $_SESSION['acl'] = $acl['perms'];
                 }
             }
+            if (isset($userdetails['2fo']) && $userdetails['2fo']) {
+                if (!isset($_POST['onekey'])) {
+                    $_POST['onekey'] = 0;
+                }
+                require($config['path'] . '/libs/googleauthenticator/GoogleAuthenticator.php');
+                $ga = new PHPGangsta_GoogleAuthenticator();
+                if (!$ga->verifyCode($userdetails['2fokey'], $_POST['onekey'], 2)) {
+                    header('Location: index.php?login=failed');
+                    die();
+                }
+            }
             logevent('User ' . $_SESSION['user'] . ' logged in', 'activity');
             header('Location: index.php');
             die();
@@ -25,39 +36,9 @@ if (constant('FILEACCESS')) {
             header('Location: index.php?login=failed');
         }
     } else {
-        include($config['path'] . '/includes/header.php');
-?>
-<div class="container">
-    <div class="col-md-6 col-md-offset-3 well">
-<?php
-        if (isset($_GET['login']) && $_GET['login'] == 'failed') {
-            echo '<div class="alert alert-info">Login failed.</div>';
-        }
-?>
-	<h2 class="text-center">Please log in</h2>
-        <form class="form-horizontal" role="form" method="post" action="index.php">
-            <div class="form-group">
-                <label for="inputUsername3" class="col-sm-2 control-label">Username</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" name="username" id="inputUsername3" placeholder="admin">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
-                <div class="col-sm-10">
-                    <input type="password" class="form-control" name="password" id="inputPassword3" placeholder="Password">
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-default">Sign in</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-<?php
-        include($config['path'] . '/includes/footer.php');
+        $smarty->display($config['path'].'/templates/header.tpl');
+        $smarty->display($config['path'].'/templates/login.tpl');
+        $smarty->display($config['path'].'/templates/footer.tpl');
     }
 }
 

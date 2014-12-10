@@ -6,6 +6,16 @@ require('config.php');
 
 define('FILEACCESS', true);
 
+require($config['path'].'/libs/smarty/Smarty.class.php');
+$smarty = new Smarty();
+$smarty->setTemplateDir($config['path'].'/templates/');
+$smarty->setCompileDir($config['path'].'/templates_c/');
+$smarty->setConfigDir($config['path'].'/configs/');
+$smarty->setCacheDir($config['path'].'/cache/');
+
+$smarty->assign('version',$config['version']);
+$smarty->assign('path',$config['path']);
+
 if ($config['debug']) {
     echo '<pre>Debug info' . PHP_EOL;
     echo '$_REQUEST' . PHP_EOL;
@@ -13,6 +23,7 @@ if ($config['debug']) {
     echo '$_SESSION' . PHP_EOL;
     print_r($_SESSION);
     echo '</pre>';
+    $smarty->debugging = true;
 }
 
 function checkacl($acl, $noredirect = false)
@@ -71,6 +82,7 @@ function logevent($data, $type)
 if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
     //login check
     $loggedin = false;
+    $smarty->assign('loggedin', false);
     include($config['path'] . '/includes/login.php');
 } else {
     if ($_SESSION['ip'] != $_SERVER['REMOTE_ADDR']) {
@@ -87,10 +99,11 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
         //restart inactivity timer
         $_SESSION['time'] = time();
         $loggedin         = true;
+        $smarty->assign('loggedin', true);
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'accessdenied') {
-            include($config['path'] . '/includes/header.php');
+            $smarty->display($config['path'].'/templates/header.tpl');
             echo '<div class="container"><div class="alert alert-danger"><h1>Access Denied</h1><p>You are not authorized to access this page</p></div></div>';
-            include($config['path'] . '/includes/footer.php');
+            $smarty->display($config['path'].'/templates/footer.tpl');
         } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backupservers') {
             checkacl('spaccess');
             include($config['path'] . '/includes/backupservers.php');
@@ -171,7 +184,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
             } else {
                 echo 'File does not exist';
             }
-        } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backuprestore' && isset($_REQUEST['id'])) {
+        } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backuprestore') {
             checkacl('restoreb');
             include($config['path'] . '/includes/backuprestore.php');
         } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'logout') {
@@ -190,7 +203,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
             echo '</pre>';
         } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'activitylogs') {
             checkacl('alog');
-            include($config['path'] . '/includes/header.php');
+            $smarty->display($config['path'].'/templates/header.tpl');
             echo '<h4>Activity Logs</h4>';
             $activitylogs = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
             $activitylogs = array_reverse($activitylogs);
@@ -206,10 +219,10 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
                 }
             }
             echo '</table>';
-            include($config['path'] . '/includes/footer.php');
+            $smarty->display($config['path'].'/templates/footer.tpl');
         } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backuplogs') {
             checkacl('blog');
-            include($config['path'] . '/includes/header.php');
+            $smarty->display($config['path'].'/templates/header.tpl');
             echo '<h4>Backup Logs</h4>';
             $backuplogs = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
             $backuplogs = array_reverse($backuplogs);
@@ -223,7 +236,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
                 }
             }
             echo '</table>';
-            include($config['path'] . '/includes/footer.php');
+            $smarty->display($config['path'].'/templates/footer.tpl');
         } else {
             include($config['path'] . '/includes/home.php');
         }

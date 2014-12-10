@@ -27,7 +27,8 @@ CDP.me is released under GNU GPL v2. By downloading, using and editing CDP.me yo
 * MySQL Backups
 * OpenVZ Node Backups
 * cPanel Account Backups
-* Backup Encryption (AES-256)
+* 2-Factor Authentication (Google Authenticator)
+* Backup Encryption (AES-256/GPG)
 * User accounts / ACL's
 
 ---------------------------------------
@@ -67,4 +68,5 @@ The latest version available can be found [here](https://github.com/PetaByet/cdp
 ---------------------------------------
 For more information about CDP.me, please visit our wiki at https://github.com/PetaByet/cdp/wiki
 Please report any bugs that you have found here https://github.com/PetaByet/cdp/issues
+We no longer maintain a change log, however you may look at the release notes for changes.
   

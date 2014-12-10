@@ -29,7 +29,7 @@ if (constant('FILEACCESS')) {
         return false;
     }
     $backupjob = GetJobDetails($_GET['id']);
-    include($config['path'] . '/includes/header.php');
+    $smarty->display($config['path'].'/templates/header.tpl');
     echo '<div class="container"><h2>View Backups</h2>';
     if ($backupjob['encryption'] == 'AES-256') {
         echo '<div class="alert alert-info">It may take a little longer to download decrypted files, please be patient!</div>';
@@ -45,7 +45,7 @@ if (constant('FILEACCESS')) {
             if ($backupjob['encryption'] == 'AES-256') {
                 echo '<a href="index.php?action=backupdownloaddecrypt&id=' . $backup['file'] . '" class="btn btn-success">Download (Decrypted)</a> ';
             }
-            echo '<a href="#" onclick="ConfirmRestore(\'index.php?action=backuprestore&id=' . $backup['file'] . '\')" class="btn btn-info">Restore</a>
+            echo '<a href="#" onclick="ConfirmRestore(\'index.php?action=backuprestore&step=1&id=' . $backup['file'] . '\')" class="btn btn-info">Restore</a>
             <a href="index.php?action=backupdelete&id=' . $backup['file'] . '" class="btn btn-danger">Delete</a></td></tr>';
         }
     }
@@ -61,7 +61,7 @@ function ConfirmRestore(url) {
 }
 </script>
     <?php
-    include($config['path'] . '/includes/footer.php');
+    $smarty->display($config['path'].'/templates/footer.tpl');
 }
 
 ?>

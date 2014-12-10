@@ -10,12 +10,27 @@ Options -Indexes
  deny from all
 </Files>
 
+<Files *.txt>
+ order allow,deny
+ deny from all
+</Files>
+
 <Files *.sql>
  order allow,deny
  deny from all
 </Files>
 
 <Files *.tar.gz>
+ order allow,deny
+ deny from all
+</Files>
+
+<Files *.tpl>
+ order allow,deny
+ deny from all
+</Files>
+
+<Files *.tpl.php>
  order allow,deny
  deny from all
 </Files>

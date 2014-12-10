@@ -35,7 +35,7 @@ $config['smtppassword']     = '';                       //smtp password (only en
 $config['smtpsecure']       = 'tls';                    //smtp encryption (tls / ssl)
 $config['smtpport']         = 587;                      //smtp port (only enter if smtp is true)
 $config['path']             = '/var/www/html';          //script root path
-$config['version']          = 'Beta 1.6';               //script version
+$config['version']          = '1.0';                    //script version
 $config['logintimeout']     = '1800';                   //inactivity timeout in seconds
 $config['debug']            = false;                    //debug mode
 

@@ -81,111 +81,18 @@ if (constant('FILEACCESS')) {
             header('Location: index.php?action=useracl');
         }
     } else {
-        include($config['path'] . '/includes/header.php');
-?>
-
-<div class="container">
-	<h2 class="text-center">User ACLs</h2>
-    <table class="table table-striped table-bordered">
-        <tr><th>ID</th><th>Name</th><th>Actions</th></tr>
-    <?php
-        if (is_array($acls)) {
-            foreach ($acls as $acl) {
-                echo '<tr><td>' . $acl['id'] . '</td>';
-                echo '<td>' . $acl['name'] . '</td>';
-                echo '<td><a href="index.php?action=useracl&id=' . $acl['id'] . '" class="btn btn-info">Edit</a> <a href="index.php?action=useracl&users=remove&id=' . $acl['id'] . '" class="btn btn-danger">Delete</a></td></tr>';
-            }
-        }
-?>
-    </table>
-    <?php
-        if (isset($_REQUEST['id']) && is_array($acl)) {
+        $smarty->assign('acls',$acls);
+        $smarty->assign('aclarray',$aclarray);
+        if (isset($_REQUEST['id']) && is_array($acls)) {
             foreach ($acls as $acl) {
                 if ($acl['id'] == $_REQUEST['id']) {
-                    $acldetails = $acl;
+                    $smarty->assign('acldetails',$acl);
                 }
             }
         }
-        if (isset($acldetails) && is_array($acldetails)) {
-?>
-    <h3>Edit ACL</h3>
-    <div class="alert alert-info">ACL changes will take effect the next time the user logs in.</div>
-    <form class="form-horizontal" role="form" method="post" action="index.php">
-        <input type="hidden" name="action" value="useracl">
-        <input type="hidden" name="acl" value="edit">
-        <input type="hidden" name="aclid" value="<?php
-            echo $_REQUEST['id'];
-?>">
-        <?php
-            foreach ($aclarray as $groupkey => $aclgroup) {
-                echo '<div class="panel panel-default"><div class="panel-heading">';
-                echo '<h4 class="panel-title">' . $groupkey . '</h4></div><div class="panel-body">';
-                foreach ($acls as $acl) {
-                    if ($acl['id'] == $_REQUEST['id']) {
-                        $acldetails = $acl;
-                    }
-                }
-                foreach ($aclgroup as $itemkey => $aclitem) {
-                    echo '<div class="col-md-2">' . $aclitem . '</div><div class="col-md-1"><select name="perms[' . $itemkey . ']">';
-                    if ($acldetails['perms'][$itemkey] == 'true') {
-                        echo '<option value="true" selected>True</option><option value="false">False</option></select></div>';
-                    } else {
-                        echo '<option value="true">True</option><option value="false" selected>False</option></select></div>';
-                    }
-                }
-                echo '</div></div>';
-            }
-?>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">ACL Name</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="name" value="<?php
-            echo $acldetails['name'];
-?>" required>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-default">Submit</button>
-            </div>
-        </div>
-    </form>
-    <?php
-        } else {
-?>
-    <h3>Add ACL</h3>
-    <form class="form-horizontal" role="form" method="post" action="index.php">
-        <input type="hidden" name="action" value="useracl">
-        <input type="hidden" name="acl" value="add">
-        <?php
-            foreach ($aclarray as $groupkey => $aclgroup) {
-                echo '<div class="panel panel-default"><div class="panel-heading">';
-                echo '<h4 class="panel-title">' . $groupkey . '</h4></div><div class="panel-body">';
-                foreach ($aclgroup as $itemkey => $aclitem) {
-                    echo '<div class="col-md-2">' . $aclitem . '</div><div class="col-md-1"><select name="perms[' . $itemkey . ']">';
-                    echo '<option value="true">True</option><option value="false">False</option></select></div>';
-                }
-                echo '</div></div>';
-            }
-?>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">ACL Name</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="name" placeholder="Users" required>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-default">Submit</button>
-            </div>
-        </div>
-    </form>
-    <?php
-        }
-?>
-</div>
-<?php
-        include($config['path'] . '/includes/footer.php');
+        $smarty->display($config['path'].'/templates/header.tpl');
+        $smarty->display($config['path'].'/templates/useracl.tpl');
+        $smarty->display($config['path'].'/templates/footer.tpl');
     }
 }
 
