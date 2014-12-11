@@ -1,9 +1,28 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
     if (isset($_POST['username']) && isset($_POST['password'])) {
-        $users = json_decode(file_get_contents($config['path'] . '/includes/db-users.json'), true);
-        $acls  = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
+        $users = json_decode(file_get_contents($config['path'] . '/db/db-users.json'), true);
+        $acls  = json_decode(file_get_contents($config['path'] . '/db/db-acl.json'), true);
         foreach ($users as $user) {
             if ($user['username'] == $_POST['username']) {
                 $userdetails = $user;

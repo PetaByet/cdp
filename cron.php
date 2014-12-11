@@ -12,9 +12,9 @@ $starttime = time();
 
 $log = 'Backup job (' . $argv[1] . ') started' . PHP_EOL;
 
-$backups       = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
-$backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
-$backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+$backups       = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
+$backupjobs    = json_decode(file_get_contents($config['path'] . '/db/db-backupjobs.json'), true);
+$backupservers = json_decode(file_get_contents($config['path'] . '/db/db-backupservers.json'), true);
 
 function exitcron()
 {
@@ -62,23 +62,23 @@ function logevent($data, $type)
     }
     if (isset($data) && isset($type)) {
         if ($type == 'activity') {
-            $activitylogs                       = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
+            $activitylogs                       = json_decode(file_get_contents($config['path'] . '/db/db-activitylog.json'), true);
             $activitylogs[count($activitylogs)] = array(
                 'id' => count($activitylogs) + 1,
                 'data' => trim($data),
                 'time' => time(),
                 'ip' => $ipaddr
             );
-            file_put_contents($config['path'] . '/includes/db-activitylog.json', json_encode($activitylogs));
+            file_put_contents($config['path'] . '/db/db-activitylog.json', json_encode($activitylogs));
         } elseif ($type == 'backup') {
-            $backuplogs                     = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
+            $backuplogs                     = json_decode(file_get_contents($config['path'] . '/db/db-backuplog.json'), true);
             $backuplogs[count($backuplogs)] = array(
                 'id' => count($backuplogs) + 1,
                 'data' => trim($data),
                 'time' => time(),
                 'ip' => $ipaddr
             );
-            file_put_contents($config['path'] . '/includes/db-backuplog.json', json_encode($backuplogs));
+            file_put_contents($config['path'] . '/db/db-backuplog.json', json_encode($backuplogs));
         }
     }
 }
@@ -156,7 +156,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     $dirname = 'cdpme-' . date("Y-m-d-H-i-s") . '-' . $backupjob['id'];
     $log .= $ssh->exec(escapeshellcmd('mkdir /tmp/' . $dirname)) . PHP_EOL;
     if ($backupjob['type'] == 'incremental') {
-        $incrementalbackups     = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
+        $incrementalbackups     = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
         $incrementalbackups     = array_reverse($incrementalbackups);
         $incrementalbackuparray = array();
         foreach ($backups as $backup) {
@@ -203,7 +203,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         'time' => $starttime
     );
     
-    file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+    file_put_contents($config['path'] . '/db/db-backups.json', json_encode($backups));
 } elseif ($backupjob['type'] == 'mysql') {
     set_include_path($config['path'] . '/libs/phpseclib');
     include('Crypt/AES.php');
@@ -299,7 +299,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         'time' => $starttime
     );
     
-    file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+    file_put_contents($config['path'] . '/db/db-backups.json', json_encode($backups));
 } elseif ($backupjob['type'] == 'openvz') {
     $log .= 'Starting OpenVZ backup' . PHP_EOL;
     set_include_path($config['path'] . '/libs/phpseclib');
@@ -412,7 +412,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
                     'size' => filesize($config['path'] . '/files/' . $dirname . '-vzdump-'.$container.'.tgz'),
                     'time' => $vzstarttime
                 );
-                file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+                file_put_contents($config['path'] . '/db/db-backups.json', json_encode($backups));
             }
         }
     }
@@ -504,7 +504,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
             'size' => filesize($config['path'] . '/files/' . $filename),
             'time' => $cpstarttime
         );
-        file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+        file_put_contents($config['path'] . '/db/db-backups.json', json_encode($backups));
     }
     else {
         $log .=  'Backup failed';
@@ -520,7 +520,7 @@ $timetaken = time() - $starttime;
 $log .= 'Backup completed in ' . $timetaken . ' seconds.' . PHP_EOL;
 
 if (isset($backupjob['expiry'])) {
-    $backups = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
+    $backups = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
     $log .= 'Processing backup auto-delete' . PHP_EOL;
     $expirecutofftime = time() - 86400 * $backupjob['expiry'];
     foreach ($backups as $backupkey => $backup) {
@@ -533,7 +533,7 @@ if (isset($backupjob['expiry'])) {
             }
         }
     }
-    file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+    file_put_contents($config['path'] . '/db/db-backups.json', json_encode($backups));
 }
 
 logevent('Backup for '.$backupserver['host'].' completed.', 'backup');

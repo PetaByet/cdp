@@ -1,8 +1,27 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
     checkacl('spaccess');
-    $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'] . '/db/db-backupservers.json'), true);
     if (isset($_REQUEST['backupserver'])) {
         if ($_REQUEST['backupserver'] == 'add' && isset($_REQUEST['host']) && isset($_REQUEST['port']) && isset($_REQUEST['authtype']) && isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
             checkacl('addserver');
@@ -15,7 +34,7 @@ if (constant('FILEACCESS')) {
                 'username' => $_REQUEST['username'],
                 'password' => $_REQUEST['password']
             );
-            file_put_contents($config['path'] . '/includes/db-backupservers.json', json_encode($backupservers));
+            file_put_contents($config['path'] . '/db/db-backupservers.json', json_encode($backupservers));
             logevent('User ' . $_SESSION['user'] . ' added server', 'activity');
             header('Location: index.php?action=backupservers');
         } elseif ($_REQUEST['backupserver'] == 'remove' && isset($_REQUEST['id'])) {
@@ -25,7 +44,7 @@ if (constant('FILEACCESS')) {
                     unset($backupservers[$key]);
                 }
             }
-            file_put_contents($config['path'] . '/includes/db-backupservers.json', json_encode($backupservers));
+            file_put_contents($config['path'] . '/db/db-backupservers.json', json_encode($backupservers));
             logevent('User ' . $_SESSION['user'] . ' removed server', 'activity');
             header('Location: index.php?action=backupservers');
         }

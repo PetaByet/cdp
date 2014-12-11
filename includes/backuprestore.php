@@ -1,5 +1,24 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
     checkacl('restoreb');
     if (isset($_GET['restoreaction']) && $_GET['restoreaction'] == 'initiate') {
@@ -12,9 +31,9 @@ if (constant('FILEACCESS')) {
             echo $tmpfile;
         }
     } elseif (isset($_GET['id'])) {
-        $backups       = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
-        $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
-        $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+        $backups       = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
+        $backupjobs    = json_decode(file_get_contents($config['path'] . '/db/db-backupjobs.json'), true);
+        $backupservers = json_decode(file_get_contents($config['path'] . '/db/db-backupservers.json'), true);
         function GetBackupDetails($backupdata)
         {
             global $backups;

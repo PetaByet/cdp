@@ -1,9 +1,28 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
-    $backups       = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
-    $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
-    $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+    $backups       = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
+    $backupjobs    = json_decode(file_get_contents($config['path'] . '/db/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'] . '/db/db-backupservers.json'), true);
     $smarty->assign('path',$config['path']);
     $smarty->assign('backupjobscount',count($backupjobs));
     $smarty->assign('backupserverscount',count($backupservers));
@@ -11,7 +30,7 @@ if (constant('FILEACCESS')) {
     $smarty->assign('disk',round((disk_total_space($config['path']) - disk_free_space($config['path'])) / disk_total_space($config['path']) * 100, 2));
     $loadavg = sys_getloadavg();
     $smarty->assign('loadavg',$loadavg[0] . '/' . $loadavg[1] . '/' . $loadavg[2]);
-    $activitylogs = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
+    $activitylogs = json_decode(file_get_contents($config['path'] . '/db/db-activitylog.json'), true);
     $activitylogs = array_reverse($activitylogs);
     $activitylogentries = array();
     for ($i = 0; $i < 10; $i++) {
@@ -36,7 +55,7 @@ if (constant('FILEACCESS')) {
         }
     }
     $smarty->assign('activitylogentries',$activitylogentries);
-    $backuplogs = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
+    $backuplogs = json_decode(file_get_contents($config['path'] . '/db/db-backuplog.json'), true);
     $backuplogs = array_reverse($backuplogs);
     $backuplogentries = array();
     for ($i = 0; $i < 10; $i++) {

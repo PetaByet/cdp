@@ -1,9 +1,28 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
     checkacl('bjpaccess');
-    $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
-    $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+    $backupjobs    = json_decode(file_get_contents($config['path'] . '/db/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'] . '/db/db-backupservers.json'), true);
     if (isset($_REQUEST['backupjob'])) {
         if ($_REQUEST['backupjob'] == 'add' && isset($_REQUEST['source']) && isset($_REQUEST['directory']) && isset($_REQUEST['expiry']) && isset($_REQUEST['encryption'])) {
             checkacl('addjob');
@@ -20,7 +39,7 @@ if (constant('FILEACCESS')) {
                 'encryptionkey' => $_REQUEST['encryptionkey'],
                 'type' => $_REQUEST['type']
             );
-            file_put_contents($config['path'] . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            file_put_contents($config['path'] . '/db/db-backupjobs.json', json_encode($backupjobs));
             logevent('User ' . $_SESSION['user'] . ' added backup job', 'activity');
             header('Location: index.php?action=backupjobs&created=true&id=' . $id);
         } elseif ($_REQUEST['backupjob'] == 'remove' && isset($_REQUEST['id'])) {
@@ -30,7 +49,7 @@ if (constant('FILEACCESS')) {
                     unset($backupjobs[$key]);
                 }
             }
-            file_put_contents($config['path'] . '/includes/db-backupjobs.json', json_encode($backupjobs));
+            file_put_contents($config['path'] . '/db/db-backupjobs.json', json_encode($backupjobs));
             logevent('User ' . $_SESSION['user'] . ' removed backup job', 'activity');
             header('Location: index.php?action=backupjobs');
         }
