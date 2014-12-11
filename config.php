@@ -34,21 +34,21 @@ $config['smtpusername']     = '';                       //smtp username (only en
 $config['smtppassword']     = '';                       //smtp password (only enter if smtp is true)
 $config['smtpsecure']       = 'tls';                    //smtp encryption (tls / ssl)
 $config['smtpport']         = 587;                      //smtp port (only enter if smtp is true)
-$config['path']             = dirname(__FILE__);          //script root path
+$config['path']             = dirname(__FILE__);        //script root path
 $config['version']          = '1.0';                    //script version
 $config['logintimeout']     = '1800';                   //inactivity timeout in seconds
 $config['debug']            = false;                    //debug mode
-$config['debuglevel']       = 2;                               //0 for just show errors, 1 for just log errors or 2 for show and log errors
-$config['errorlevels']      = 'E_ALL | E_STRICT';              //error reporting level
-$config['logerrors']        = true;                            //log errors to the syslog even when degub is set to false
-$config['timezone']         = 'UTC';                           //default time zone to use
+$config['debuglevel']       = 2;                        //0 for just show errors, 1 for just log errors or 2 for show and log errors
+$config['errorlevels']      = 'E_ALL | E_STRICT';       //error reporting level
+$config['logerrors']        = true;                     //log errors to the syslog even when degub is set to false
+$config['timezone']         = 'UTC';                    //default time zone to use
 
 // DON'T EDIT BELOW THIS LINE
 
-error_reporting($config['errorlevels']);                       //set error reporting level
-date_default_timezone_set($config['timezone']);                //set time zone
+error_reporting($config['errorlevels']);                //set error reporting level
+date_default_timezone_set($config['timezone']);         //set time zone
 
-if ($config['debug'])                                         //enable or disable debug mode
+if ($config['debug'])                                   //enable or disable debug mode
 {
 	switch ($config['debuglevel'])
 	{
@@ -75,7 +75,7 @@ else
 	ini_set('display_errors', 0);
 }
 
-if ($config['logerrors'])                                      //enable or disable error logging for the syslog
+if ($config['logerrors'])                                 //enable or disable error logging for the syslog
 {
 	ini_set('log_errors', 1);
 	ini_set('error_log', 'syslog');
