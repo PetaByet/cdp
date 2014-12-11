@@ -1,5 +1,25 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
+
 /**
 CDP.me | Data Backups
 Copyright (C) 2014  CDP.me / PetaByet.com
@@ -19,10 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 **/
 
-error_reporting(E_ALL);                                 //error reporting
-ini_set('display_errors', 1);
-
-date_default_timezone_set('UTC');                       //set time zone
+// edit the configuration below to meet your needs
 
 $config                     = array();
 $config['adminemail']       = 'someone@test.com';       //the email address to send notifications to

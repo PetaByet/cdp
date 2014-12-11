@@ -1,5 +1,24 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
     checkacl('apaccess');
     $aclarray = array(
@@ -42,7 +61,7 @@ if (constant('FILEACCESS')) {
         )
     );
     
-    $acls = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
+    $acls = json_decode(file_get_contents($config['path'] . '/db/db-acl.json'), true);
     if (isset($_REQUEST['acl'])) {
         if ($_REQUEST['acl'] == 'add' && isset($_REQUEST['perms']) && isset($_REQUEST['name']) && is_array($_REQUEST['perms'])) {
             checkacl('addacl');
@@ -52,7 +71,7 @@ if (constant('FILEACCESS')) {
                 'name' => trim($_REQUEST['name'])
             );
             
-            file_put_contents($config['path'] . '/includes/db-acl.json', json_encode($acls));
+            file_put_contents($config['path'] . '/db/db-acl.json', json_encode($acls));
             logevent('User ' . $_SESSION['user'] . ' added ACL', 'activity');
             header('Location: index.php?action=useracl');
         } elseif ($_REQUEST['acl'] == 'edit' && isset($_REQUEST['perms']) && isset($_REQUEST['name']) && isset($_REQUEST['aclid']) && is_array($_REQUEST['perms'])) {
@@ -66,7 +85,7 @@ if (constant('FILEACCESS')) {
                     );
                 }
             }
-            file_put_contents($config['path'] . '/includes/db-acl.json', json_encode($acls));
+            file_put_contents($config['path'] . '/db/db-acl.json', json_encode($acls));
             logevent('User ' . $_SESSION['user'] . ' edited ACL ' . $_REQUEST['aclid'], 'activity');
             header('Location: index.php?action=useracl');
         } elseif ($_REQUEST['acl'] == 'remove' && isset($_REQUEST['id'])) {
@@ -76,7 +95,7 @@ if (constant('FILEACCESS')) {
                     unset($acls[$aclkey]);
                 }
             }
-            file_put_contents($config['path'] . '/includes/db-acl.json', json_encode($acls));
+            file_put_contents($config['path'] . '/db/db-acl.json', json_encode($acls));
             logevent('User ' . $_SESSION['user'] . ' removed ACL ' . $_REQUEST['id'], 'activity');
             header('Location: index.php?action=useracl');
         }

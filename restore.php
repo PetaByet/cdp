@@ -14,9 +14,9 @@ echo 'Backup restore job (' . $argv[1] . ') started' . PHP_EOL;
 ignore_user_abort(true);
 set_time_limit(0);
 echo 'Initiating backup restore...' . PHP_EOL;
-$backups       = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
-$backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
-$backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+$backups       = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
+$backupjobs    = json_decode(file_get_contents($config['path'] . '/db/db-backupjobs.json'), true);
+$backupservers = json_decode(file_get_contents($config['path'] . '/db/db-backupservers.json'), true);
 
 function logevent($data, $type)
 {
@@ -28,23 +28,23 @@ function logevent($data, $type)
     }
     if (isset($data) && isset($type)) {
         if ($type == 'activity') {
-            $activitylogs                       = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
+            $activitylogs                       = json_decode(file_get_contents($config['path'] . '/db/db-activitylog.json'), true);
             $activitylogs[count($activitylogs)] = array(
                 'id' => count($activitylogs) + 1,
                 'data' => trim($data),
                 'time' => time(),
                 'ip' => $ipaddr
             );
-            file_put_contents($config['path'] . '/includes/db-activitylog.json', json_encode($activitylogs));
+            file_put_contents($config['path'] . '/db/db-activitylog.json', json_encode($activitylogs));
         } elseif ($type == 'backup') {
-            $backuplogs                     = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
+            $backuplogs                     = json_decode(file_get_contents($config['path'] . '/db/db-backuplog.json'), true);
             $backuplogs[count($backuplogs)] = array(
                 'id' => count($backuplogs) + 1,
                 'data' => trim($data),
                 'time' => time(),
                 'ip' => $ipaddr
             );
-            file_put_contents($config['path'] . '/includes/db-backuplog.json', json_encode($backuplogs));
+            file_put_contents($config['path'] . '/db/db-backuplog.json', json_encode($backuplogs));
         }
     }
 }

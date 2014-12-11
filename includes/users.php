@@ -1,9 +1,28 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
     checkacl('upaccess');
-    $users = json_decode(file_get_contents($config['path'] . '/includes/db-users.json'), true);
-    $acls  = json_decode(file_get_contents($config['path'] . '/includes/db-acl.json'), true);
+    $users = json_decode(file_get_contents($config['path'] . '/db/db-users.json'), true);
+    $acls  = json_decode(file_get_contents($config['path'] . '/db/db-acl.json'), true);
     if (isset($_REQUEST['users'])) {
         if ($_REQUEST['users'] == '2focreatekey') {
             require($config['path'] . '/libs/googleauthenticator/GoogleAuthenticator.php');
@@ -28,7 +47,7 @@ if (constant('FILEACCESS')) {
                 '2fo' => $_REQUEST['2fo'],
                 '2fokey' => $_REQUEST['2fokey']
             );
-            file_put_contents($config['path'] . '/includes/db-users.json', json_encode($users));
+            file_put_contents($config['path'] . '/db/db-users.json', json_encode($users));
             logevent('User ' . $_SESSION['user'] . ' added user ' . $_REQUEST['username'], 'activity');
             header('Location: index.php?action=users');
         } elseif ($_REQUEST['users'] == 'edit' && isset($_REQUEST['username']) && isset($_REQUEST['userid']) && isset($_REQUEST['acl'])) {
@@ -47,7 +66,7 @@ if (constant('FILEACCESS')) {
                     }
                 }
             }
-            file_put_contents($config['path'] . '/includes/db-users.json', json_encode($users));
+            file_put_contents($config['path'] . '/db/db-users.json', json_encode($users));
             logevent('User ' . $_SESSION['user'] . ' edited user ' . $_REQUEST['username'], 'activity');
             header('Location: index.php?action=users');
         } elseif ($_REQUEST['users'] == 'remove' && isset($_REQUEST['id'])) {
@@ -57,7 +76,7 @@ if (constant('FILEACCESS')) {
                     unset($users[$userkey]);
                 }
             }
-            file_put_contents($config['path'] . '/includes/db-users.json', json_encode($users));
+            file_put_contents($config['path'] . '/db/db-users.json', json_encode($users));
             logevent('User ' . $_SESSION['user'] . ' removed user', 'activity');
             header('Location: index.php?action=users');
         }

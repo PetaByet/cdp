@@ -58,23 +58,23 @@ function logevent($data, $type)
     }
     if (isset($data) && isset($type)) {
         if ($type == 'activity') {
-            $activitylogs                       = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
+            $activitylogs                       = json_decode(file_get_contents($config['path'] . '/db/db-activitylog.json'), true);
             $activitylogs[count($activitylogs)] = array(
                 'id' => count($activitylogs) + 1,
                 'data' => trim($data),
                 'time' => time(),
                 'ip' => $ipaddr
             );
-            file_put_contents($config['path'] . '/includes/db-activitylog.json', json_encode($activitylogs));
+            file_put_contents($config['path'] . '/db/db-activitylog.json', json_encode($activitylogs));
         } elseif ($type == 'backup') {
-            $backuplogs                     = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
+            $backuplogs                     = json_decode(file_get_contents($config['path'] . '/db/db-backuplog.json'), true);
             $backuplogs[count($backuplogs)] = array(
                 'id' => count($backuplogs) + 1,
                 'data' => trim($data),
                 'time' => time(),
                 'ip' => $ipaddr
             );
-            file_put_contents($config['path'] . '/includes/db-backuplog.json', json_encode($backuplogs));
+            file_put_contents($config['path'] . '/db/db-backuplog.json', json_encode($backuplogs));
         }
     }
 }
@@ -131,8 +131,8 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
         } elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'backupdownloaddecrypt' && isset($_REQUEST['id'])) {
             checkacl('downloadb');
             if (file_exists($config['path'] . '/files/' . $_REQUEST['id']) == 1) {
-                $backups       = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
-                $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
+                $backups       = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
+                $backupjobs    = json_decode(file_get_contents($config['path'] . '/db/db-backupjobs.json'), true);
                 function GetBackupDetails($backupdata)
                 {
                     global $backups;
@@ -169,13 +169,13 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
             checkacl('deleteb');
             if (file_exists($config['path'] . '/files/' . $_REQUEST['id'])) {
                 if (unlink($config['path'] . '/files/' . $_REQUEST['id'])) {
-                    $backups = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
+                    $backups = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
                     foreach ($backups as $key => $backup) {
                         if ($backup['file'] == $_REQUEST['id']) {
                             unset($backups[$key]);
                         }
                     }
-                    file_put_contents($config['path'] . '/includes/db-backups.json', json_encode($backups));
+                    file_put_contents($config['path'] . '/db/db-backups.json', json_encode($backups));
                     logevent('User ' . $_SESSION['user'] . ' deleted backup', 'activity');
                     header('Location: index.php?action=backupjobs');
                 } else {
@@ -205,7 +205,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
             checkacl('alog');
             $smarty->display($config['path'].'/templates/header.tpl');
             echo '<h4>Activity Logs</h4>';
-            $activitylogs = json_decode(file_get_contents($config['path'] . '/includes/db-activitylog.json'), true);
+            $activitylogs = json_decode(file_get_contents($config['path'] . '/db/db-activitylog.json'), true);
             $activitylogs = array_reverse($activitylogs);
             echo '<table class="table table-bordered table-striped">';
             echo '<tr><th>Data</th><th>Time</th><th>IP</th></tr>';
@@ -224,7 +224,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['acl'])) {
             checkacl('blog');
             $smarty->display($config['path'].'/templates/header.tpl');
             echo '<h4>Backup Logs</h4>';
-            $backuplogs = json_decode(file_get_contents($config['path'] . '/includes/db-backuplog.json'), true);
+            $backuplogs = json_decode(file_get_contents($config['path'] . '/db/db-backuplog.json'), true);
             $backuplogs = array_reverse($backuplogs);
             echo '<table class="table table-bordered table-striped">';
             echo '<tr><th>Data</th><th>Time</th><th>IP</th></tr>';

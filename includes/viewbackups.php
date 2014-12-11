@@ -1,5 +1,24 @@
 <?php
 
+//stop file from being directly acessed
+
+if (phpversion() >= 5)
+    {
+    if (count(get_included_files()) == 1)
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+else
+{
+    if (count(get_included_files()) == 0)  //stop file from being directly acessed
+    {
+        header("HTTP/1.1 404 File Not Found", 404);
+        exit;
+    }
+}
+
 if (constant('FILEACCESS')) {
     checkacl('viewbackup');
     function formatBytes($size, $precision = 2)
@@ -14,10 +33,10 @@ if (constant('FILEACCESS')) {
         );
         return round(pow(1024, $base - floor($base)), $precision) . $suffixes[floor($base)];
     }
-    $backups = json_decode(file_get_contents($config['path'] . '/includes/db-backups.json'), true);
+    $backups = json_decode(file_get_contents($config['path'] . '/db/db-backups.json'), true);
     $backups = array_reverse($backups); //reverse the array to make newest backups at the top
-    $backupjobs    = json_decode(file_get_contents($config['path'] . '/includes/db-backupjobs.json'), true);
-    $backupservers = json_decode(file_get_contents($config['path'] . '/includes/db-backupservers.json'), true);
+    $backupjobs    = json_decode(file_get_contents($config['path'] . '/db/db-backupjobs.json'), true);
+    $backupservers = json_decode(file_get_contents($config['path'] . '/db/db-backupservers.json'), true);
     function GetJobDetails($jobid)
     {
         global $backupjobs;
