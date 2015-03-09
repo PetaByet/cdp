@@ -459,8 +459,18 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         }
         $maindomain = json_decode($xmlapi->api2_query($backupserver['username'], 'ZoneEdit','fetch_cpanel_generated_domains'), true);
         $maindomain = chop($maindomain['cpanelresult']['data'][count($maindomain['cpanelresult']['data'])-1]['domain'], '.');
-        $ftp_connect = ftp_connect($backupserver['host']) or exitcron();
-        $ftp_login = ftp_login($ftp_connect, $tempftpuser.'@'.$maindomain, $tempftppw);
+        $ftp_connect = ftp_connect($backupserver['host']);
+        if (!$ftp_connect) {
+            $log .=  'FTP connect failed'.PHP_EOL;
+            print_r(error_get_last());
+            exitcron();
+        }
+        $ftp_login = @ftp_login($ftp_connect, $tempftpuser.'@'.$maindomain, $tempftppw);
+        if (!$ftp_login) {
+            $log .=  'FTP login failed'.PHP_EOL;
+            print_r(error_get_last());
+            exitcron();
+        }
         if (ftp_get($ftp_connect, $filename, $latestbackup, FTP_BINARY)) {
             $log .=  'Backup downloaded, deleting from the cPanel server'.PHP_EOL;
         } else {
