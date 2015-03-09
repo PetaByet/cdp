@@ -467,7 +467,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         }
         $ftp_login = @ftp_login($ftp_connect, $tempftpuser.'@'.$maindomain, $tempftppw);
         if (!$ftp_login) {
-            $log .=  'FTP login failed'.PHP_EOL;
+            $log .=  'FTP login failed ('.$tempftpuser.'@'.$maindomain.')'.PHP_EOL;
             print_r(error_get_last());
             exitcron();
         }
