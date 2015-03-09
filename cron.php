@@ -465,6 +465,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
             $log .=  'Backup downloaded, deleting from the cPanel server'.PHP_EOL;
         } else {
             $log .=  'Error downloading backup'.PHP_EOL;
+            print_r(error_get_last());
             exitcron();
         }
         ftp_close($ftp_connect);
