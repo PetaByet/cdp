@@ -23,13 +23,9 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         }
     }
     if (is_array($userdetails) && md5($_POST['password']) == $userdetails['password']) {
-        $_SESSION['user'] = $_POST['username'];
-        $_SESSION['ip']   = $_SERVER['REMOTE_ADDR'];
-        $_SESSION['time'] = time();
-        foreach ($acls as $acl) {
-            if ($acl['id'] == $user['acl']) {
-                $_SESSION['acl'] = $acl['perms'];
-            }
+        if ($userdetails['2fo'] && !isset($userdetails['2fo'])) {
+            header('Location: index.php?login=failed');
+            die();
         }
         if (isset($userdetails['2fo']) && $userdetails['2fo']) {
             if (!isset($_POST['onekey'])) {
@@ -42,6 +38,14 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
                 die();
             }
         }
+        foreach ($acls as $acl) {
+            if ($acl['id'] == $user['acl']) {
+                $_SESSION['acl'] = $acl['perms'];
+            }
+        }
+        $_SESSION['user'] = $_POST['username'];
+        $_SESSION['ip']   = $_SERVER['REMOTE_ADDR'];
+        $_SESSION['time'] = time();
         logevent('User ' . $_SESSION['user'] . ' logged in', 'activity');
         header('Location: index.php');
         die();
