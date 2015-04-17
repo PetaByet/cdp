@@ -355,7 +355,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         $log .= 'vzdump detected' . PHP_EOL;
     }
     $verifyproxmox = $ssh->exec(escapeshellcmd('pveversion -v'));
-    if (strpos($verifyproxmox, 'pve') !== false) {
+    if (strpos($verifyproxmox, 'pve-manager') !== false) {
         $log .= 'ProxMox detected'.PHP_EOL;
         $isproxmox = true;
     } else {
