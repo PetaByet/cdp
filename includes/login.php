@@ -28,12 +28,12 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
             die();
         }
         if (isset($userdetails['2fo']) && $userdetails['2fo'] == 'true') {
-            if (!isset($_POST['onekey'])) {
-                $_POST['onekey'] = 0;
+            if (!isset($_POST['2fokey'])) {
+                $_POST['2fokey'] = 0;
             }
             require($config['path'] . '/libs/googleauthenticator/GoogleAuthenticator.php');
             $ga = new PHPGangsta_GoogleAuthenticator();
-            if (!$ga->verifyCode($userdetails['2fokey'], $_POST['onekey'], 2)) {
+            if (!$ga->verifyCode($userdetails['2fokey'], $_POST['2fokey'], 2)) {
                 header('Location: index.php?login=failed&2fofail');
                 die();
             }
