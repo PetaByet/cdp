@@ -24,17 +24,17 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
     }
     if (is_array($userdetails) && md5($_POST['password']) == $userdetails['password']) {
         if ($userdetails['2fo'] && !isset($userdetails['2fo'])) {
-            header('Location: index.php?login=failed');
+            header('Location: index.php?login=failed&pwfail');
             die();
         }
-        if (isset($userdetails['2fo']) && $userdetails['2fo']) {
+        if (isset($userdetails['2fo']) && $userdetails['2fo'] == 'true') {
             if (!isset($_POST['onekey'])) {
                 $_POST['onekey'] = 0;
             }
             require($config['path'] . '/libs/googleauthenticator/GoogleAuthenticator.php');
             $ga = new PHPGangsta_GoogleAuthenticator();
             if (!$ga->verifyCode($userdetails['2fokey'], $_POST['onekey'], 2)) {
-                header('Location: index.php?login=failed');
+                header('Location: index.php?login=failed&2fofail');
                 die();
             }
         }
@@ -50,7 +50,7 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         header('Location: index.php');
         die();
     } else {
-        header('Location: index.php?login=failed');
+        header('Location: index.php?login=failed&fail');
     }
 } else {
     $smarty->display($config['path'].'/templates/header.tpl');
