@@ -26,7 +26,7 @@ if (isset($_REQUEST['users'])) {
     } elseif ($_REQUEST['users'] == 'generateqr' && isset($_REQUEST['generateqr'])) {
         require($config['path'] . '/libs/googleauthenticator/GoogleAuthenticator.php');
         $ga = new PHPGangsta_GoogleAuthenticator();
-        echo '<img src="'.$ga->getQRCodeGoogleUrl('CDP.me', $_REQUEST['generateqr']).' alt="QR Code">';
+        echo '<img src="'.$ga->getQRCodeGoogleUrl('CDP.me', $_REQUEST['generateqr']).'" alt="QR Code">';
         die();
     } elseif ($_REQUEST['users'] == 'add' && isset($_REQUEST['username']) && isset($_REQUEST['password']) && isset($_REQUEST['acl'])) {
         checkacl('adduser');
