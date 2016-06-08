@@ -55,9 +55,10 @@ if (isset($_REQUEST['users'])) {
                 $users[$userkey]['acl']      = $_REQUEST['acl'];
                 $users[$userkey]['2fo']      = $_REQUEST['2fo'];
                 $users[$userkey]['2fokey']   = $_REQUEST['2fokey'];
-                if (isset($_REQUEST['password'])) {
+                if (isset($_REQUEST['password']) && !empty($_REQUEST['password'])) {
                     $users[$userkey]['password'] = md5($_REQUEST['password']);
                 }
+                else $users[$userkey]['password'] = $user['password'];
             }
         }
         file_put_contents($config['path'] . '/db/db-users.json', json_encode($users));
