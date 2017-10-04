@@ -44,7 +44,7 @@ or
 
 If your backup server is running a distribution other than the ones above or you do not want to use Apache, you may install CDP.me manually using the wiki guide here https://github.com/PetaByet/cdp/wiki/Manual-Installation
 
-The latest version available can be found [here](https://github.com/PetaByet/cdp/releases). The change log is available here https://github.com/PetaByet/cdp/blob/master/CHANGELOG.txt
+The latest version available can be found [here](https://github.com/PetaByet/cdp/releases).
 
 ---------------------------------------
 #### System/Software Requirements
