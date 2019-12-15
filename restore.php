@@ -118,7 +118,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     } else {
         die('SSH login failed');
     }
-    echo $sftp->chdir('/');
+    echo $sftp->chdir('/tmp');
     if (isset($backupjob['encryption']) && $backupjob['encryption'] == 'AES-256') {
         echo 'Decrypting file with AES-256'.PHP_EOL;
         $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
@@ -132,8 +132,8 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
         echo 'Transferring the file'.PHP_EOL;
         echo $sftp->put($argv[1], $config['path'] . '/files/' . $argv[1], NET_SFTP_LOCAL_FILE);
     }
-    echo $ssh->exec(escapeshellcmd('tar -zxvf /' . $argv[1] . ' -C /'));
-    echo $ssh->exec(escapeshellcmd('rm -f /' . $argv[1]));
+    echo $ssh->exec(escapeshellcmd('tar -zxvf ./' . $argv[1] . ' -C /'));
+    echo $ssh->exec(escapeshellcmd('rm -f ./' . $argv[1]));
 } elseif ($backupjob['type'] == 'mysql') {
     $database = explode(' ', $backupjob['directory']);
     $db       = new PDO('mysql:host=' . $backupserver['host'] . ';port=' . $backupserver['port'] . ';dbname=' . $database[0] . ';charset=utf8', $backupserver['username'], $backupserver['password']);
@@ -188,7 +188,7 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     else {
         echo 'vzdump detected' . PHP_EOL;
     }
-    echo $sftp->chdir('/');
+    echo $sftp->chdir('/tmp');
     if (isset($backupjob['encryption']) && $backupjob['encryption'] == 'AES-256') {
         echo 'Decrypting file with AES-256'.PHP_EOL;
         $cipher = new Crypt_AES(CRYPT_AES_MODE_ECB);
@@ -208,13 +208,13 @@ if ($backupjob['type'] == 'full' || $backupjob['type'] == 'incremental') {
     echo $ssh->exec(escapeshellcmd('vzctl destroy ' . $ctid[0]));
     if (strpos($verifyproxmox, 'pve') !== false) {
         echo 'ProxMox detected, using vzrestore'.PHP_EOL;
-        echo $ssh->exec(escapeshellcmd('vzrestore /' . $argv[1] . ' ' . $ctid[0]));
+        echo $ssh->exec(escapeshellcmd('vzrestore ./' . $argv[1] . ' ' . $ctid[0]));
     } else {
         echo 'Standard OpenVZ detected, using vzdump restore'.PHP_EOL;
-        echo $ssh->exec(escapeshellcmd('vzdump --restore /' . $argv[1] . ' ' . $ctid[0]));
+        echo $ssh->exec(escapeshellcmd('vzdump --restore ./' . $argv[1] . ' ' . $ctid[0]));
     }
     echo $ssh->exec(escapeshellcmd('vzctl start ' . $ctid[0]));
-    echo $ssh->exec(escapeshellcmd('rm -f /' . $argv[1]));
+    echo $ssh->exec(escapeshellcmd('rm -f ./' . $argv[1]));
 } elseif ($backupjob['type'] == 'cpanel') {
     echo 'CDP.me does not support automatic cPanel backup restores at this moment, however you may download and restore the backup manually.'.PHP_EOL;
 } else {
